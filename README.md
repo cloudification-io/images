@@ -14,7 +14,7 @@ Executing this commands will build and push all Openstack images
 export OPENSTACK_RELEASE="2025.1"
 export TOOLS_VERSION="0.6" # increment this
 
-bash build-local.sh
+bash custom-images/build-local.sh
 ```
 
 ## Building specific images only
@@ -25,7 +25,7 @@ Use the `IMAGES` variable with a comma-separated list of image names:
 export OPENSTACK_RELEASE="2025.1"
 export IMAGES="nova,neutron"
 
-bash build-local.sh
+bash custom-images/build-local.sh
 ```
 
-Available image names can be found in [images.yaml](images.yaml).
+Available image names can be found in [images.yaml](custom-images/images.yaml).
