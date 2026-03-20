@@ -16,3 +16,16 @@ export TOOLS_VERSION="0.6" # increment this
 
 bash build-local.sh
 ```
+
+## Building specific images only
+
+Use the `IMAGES` variable with a comma-separated list of image names:
+
+```bash
+export OPENSTACK_RELEASE="2025.1"
+export IMAGES="nova,neutron"
+
+bash build-local.sh
+```
+
+Available image names can be found in [images.yaml](images.yaml).

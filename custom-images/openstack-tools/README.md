@@ -5,6 +5,7 @@
 ```shell
 export TOOLS_VERSION="${TOOLS_VERSION:-0.9}" # increment this
 export OPENSTACK_RELEASE=${OPENSTACK_RELEASE:-2024.2}
+export IMAGES="openstack-tools"
 
-bash build-tools.sh
+bash ../build-local.sh
 ```
