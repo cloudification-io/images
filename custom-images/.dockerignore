@@ -1,5 +1,0 @@
-# Exclude everything from build context by default.
-# Only nova needs files from context (nova-patches/).
-# All other Dockerfiles use only FROM/ARG/RUN with no COPY.
-*
-!nova-patches

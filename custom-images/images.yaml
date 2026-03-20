@@ -1,84 +1,116 @@
 # OpenStack components — ubuntu_noble base from quay.io/airshipit
 images:
   - name: horizon
-    dockerfile: dockerfiles/horizon.Dockerfile
-    context: .
+    dockerfile: horizon/Dockerfile
+    context: horizon
     tag_template: "{release}-ubuntu_noble"
+    paths:
+      - horizon/
 
   - name: nova
-    dockerfile: dockerfiles/nova.Dockerfile
-    context: .
+    dockerfile: nova/Dockerfile
+    context: nova
     tag_template: "{release}-ubuntu_noble"
+    paths:
+      - nova/
 
   - name: octavia
-    dockerfile: dockerfiles/octavia.Dockerfile
-    context: .
+    dockerfile: octavia/Dockerfile
+    context: octavia
     tag_template: "{release}-ubuntu_noble"
+    paths:
+      - octavia/
 
   - name: masakari
-    dockerfile: dockerfiles/masakari.Dockerfile
-    context: .
+    dockerfile: masakari/Dockerfile
+    context: masakari
     tag_template: "{release}-ubuntu_noble"
+    paths:
+      - masakari/
 
   - name: masakari-monitors
-    dockerfile: dockerfiles/masakari-monitors.Dockerfile
-    context: .
+    dockerfile: masakari-monitors/Dockerfile
+    context: masakari-monitors
     tag_template: "{release}-ubuntu_noble"
+    paths:
+      - masakari-monitors/
 
   - name: cinder
-    dockerfile: dockerfiles/cinder.Dockerfile
-    context: .
+    dockerfile: cinder/Dockerfile
+    context: cinder
     tag_template: "{release}-ubuntu_noble"
+    paths:
+      - cinder/
 
   - name: glance
-    dockerfile: dockerfiles/glance.Dockerfile
-    context: .
+    dockerfile: glance/Dockerfile
+    context: glance
     tag_template: "{release}-ubuntu_noble"
+    paths:
+      - glance/
 
   - name: keystone
-    dockerfile: dockerfiles/keystone.Dockerfile
-    context: .
+    dockerfile: keystone/Dockerfile
+    context: keystone
     tag_template: "{release}-ubuntu_noble"
+    paths:
+      - keystone/
 
   - name: neutron
-    dockerfile: dockerfiles/neutron.Dockerfile
-    context: .
+    dockerfile: neutron/Dockerfile
+    context: neutron
     tag_template: "{release}-ubuntu_noble"
+    paths:
+      - neutron/
 
   - name: cloudkitty
-    dockerfile: dockerfiles/cloudkitty.Dockerfile
-    context: .
+    dockerfile: cloudkitty/Dockerfile
+    context: cloudkitty
     tag_template: "{release}-ubuntu_noble"
+    paths:
+      - cloudkitty/
 
   - name: designate
-    dockerfile: dockerfiles/designate.Dockerfile
-    context: .
+    dockerfile: designate/Dockerfile
+    context: designate
     tag_template: "{release}-ubuntu_noble"
+    paths:
+      - designate/
 
   - name: libvirt
-    dockerfile: dockerfiles/libvirt.Dockerfile
-    context: .
+    dockerfile: libvirt/Dockerfile
+    context: libvirt
     tag_template: "{release}-ubuntu_noble"
+    paths:
+      - libvirt/
 
   # OVS uses a fixed "latest" base tag — not tied to a specific OpenStack release
   - name: openvswitch
-    dockerfile: dockerfiles/openvswitch.Dockerfile
-    context: .
+    dockerfile: openvswitch/Dockerfile
+    context: openvswitch
     tag_template: "latest-ubuntu_noble"
+    paths:
+      - openvswitch/
 
   # Gnocchi sources from quay.io/openstack.kolla (not airshipit) — uses dash, not underscore
   - name: gnocchi-api
-    dockerfile: dockerfiles/gnocchi-api.Dockerfile
-    context: .
+    dockerfile: gnocchi-api/Dockerfile
+    context: gnocchi-api
     tag_template: "{release}-ubuntu-noble"
+    paths:
+      - gnocchi-api/
 
   # Standalone builds — different base images and versioning
   - name: openstack-tools
     dockerfile: openstack-tools/Dockerfile
     context: openstack-tools
     tag_template: "{tools_version}-{release}"
+    paths:
+      - openstack-tools/
 
   - name: coredns-k8s-gateway
     dockerfile: coredns-k8s-gateway/Dockerfile
     context: coredns-k8s-gateway
     tag_template: "1.11.1"
+    paths:
+      - coredns-k8s-gateway/

@@ -8,7 +8,7 @@ ARG CONSTRAINTS=https://raw.githubusercontent.com/openstack/requirements/stable/
 RUN pip install -c ${CONSTRAINTS} jaeger-client
 RUN apt-get update && apt-get install -y ovmf
 
-COPY nova-patches/${OPENSTACK_RELEASE}/nova-ovmf-mmio.patch /tmp/nova-ovmf-mmio.patch
+COPY patches/${OPENSTACK_RELEASE}/nova-ovmf-mmio.patch /tmp/nova-ovmf-mmio.patch
 RUN apt-get update && apt-get install -y git && \
     cd /var/lib/openstack/lib/python3.12/site-packages && \
     git apply --stat /tmp/nova-ovmf-mmio.patch && \
