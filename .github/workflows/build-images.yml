@@ -32,8 +32,31 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.matrix.outputs.result }}
+      has_images: ${{ steps.matrix.outputs.has_images }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed files
+        id: changes
+        if: github.event_name == 'push'
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.sha }}
+        run: |
+          # Use GitHub-provided SHAs for reliable diff (handles merge commits)
+          # Fall back to HEAD~1 only if before_sha is zeroed (first push to branch)
+          if [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            CHANGED=$(git diff --name-only HEAD~1 HEAD -- custom-images/)
+          else
+            CHANGED=$(git diff --name-only "$BEFORE_SHA" "$AFTER_SHA" -- custom-images/)
+          fi
+
+          # Strip "custom-images/" prefix and store as JSON array for jq consumption
+          CHANGED_JSON=$(echo "$CHANGED" | sed 's|^custom-images/||' | jq -R -s -c '[split("\n") | .[] | select(length > 0)]')
+          echo "files=$CHANGED_JSON" >> "$GITHUB_OUTPUT"
+          echo "Changed files:" && echo "$CHANGED_JSON" | jq .
 
       - name: Build matrix from images.yaml
         id: matrix
@@ -41,29 +64,72 @@ jobs:
           RELEASE: ${{ inputs.openstack_release || '2025.1' }}
           TOOLS: ${{ inputs.tools_version || '1.0' }}
           FILTER: ${{ inputs.images }}
+          EVENT: ${{ github.event_name }}
+          CHANGED_FILES: ${{ steps.changes.outputs.files }}
         run: |
-          # Read YAML, substitute templates, prefix paths, output as JSON
-          MATRIX=$(yq -o=json '
-            {
-              "include": [.images[] | {
-                "name": .name,
-                "dockerfile": ("custom-images/" + .dockerfile),
-                "context": ("custom-images/" + .context),
-                "tag_prefix": .tag_template
-              }]
-            }' custom-images/images.yaml | \
-            sed "s/{release}/$RELEASE/g; s/{tools_version}/$TOOLS/g")
+          # Read YAML into JSON with all fields including paths
+          MATRIX=$(yq -o=json '{
+            "include": [.images[] | {
+              "name": .name,
+              "dockerfile": ("custom-images/" + .dockerfile),
+              "context": ("custom-images/" + .context),
+              "tag_prefix": .tag_template,
+              "paths": (.paths // [])
+            }]
+          }' custom-images/images.yaml)
 
-          # Filter by image names if requested
+          # Substitute release/version templates using jq (not sed)
+          MATRIX=$(echo "$MATRIX" | jq -c \
+            --arg release "$RELEASE" \
+            --arg tools "$TOOLS" \
+            '.include |= [.[] | .tag_prefix |= (gsub("{release}"; $release) | gsub("{tools_version}"; $tools)) |
+                                 .dockerfile |= gsub("{release}"; $release) |
+                                 .context |= gsub("{release}"; $release)]')
+
+          # Filter by image names if requested (workflow_dispatch)
           if [ -n "$FILTER" ]; then
             MATRIX=$(echo "$MATRIX" | jq -c --arg f "$FILTER" '
-              .include |= [ .[] | select(.name as $n | ($f | split(",") | map(gsub("\\s";"")) | index($n)) != null) ]')
+              .include |= [.[] | select(
+                .name as $n | ($f | split(",") | map(gsub("\\s";"")) | index($n)) != null
+              )]')
           fi
 
+          # Filter by changed paths on push events
+          if [ "$EVENT" = "push" ]; then
+            CHANGED='${{ steps.changes.outputs.files }}'
+
+            # If images.yaml itself changed, rebuild everything
+            if echo "$CHANGED" | jq -e 'any(. == "images.yaml")' > /dev/null 2>&1; then
+              echo "images.yaml changed — rebuilding all images"
+            else
+              # Keep only images where at least one changed file starts with one of the image's paths
+              MATRIX=$(echo "$MATRIX" | jq -c --argjson changed "$CHANGED" '
+                .include |= [.[] | select(
+                  .paths as $paths |
+                  any($changed[]; . as $file |
+                    any($paths[]; . as $p | ($file | startswith($p)))
+                  )
+                )]')
+            fi
+          fi
+
+          # Remove paths from final matrix (not needed by build job)
+          MATRIX=$(echo "$MATRIX" | jq -c '.include |= [.[] | del(.paths)]')
+
+          IMAGE_COUNT=$(echo "$MATRIX" | jq '.include | length')
+          echo "Images to build: $IMAGE_COUNT"
+          echo "$MATRIX" | jq -r '.include[].name'
+
+          if [ "$IMAGE_COUNT" -gt 0 ]; then
+            echo "has_images=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_images=false" >> "$GITHUB_OUTPUT"
+          fi
           echo "result=$(echo "$MATRIX" | jq -c)" >> "$GITHUB_OUTPUT"
 
   build:
     needs: setup
+    if: needs.setup.outputs.has_images == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
