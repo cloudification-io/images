@@ -1,0 +1,128 @@
+name: Build and push custom images
+
+on:
+  workflow_dispatch:
+    inputs:
+      openstack_release:
+        description: "OpenStack release"
+        required: true
+        default: "2025.1"
+        type: string
+      tools_version:
+        description: "openstack-tools version"
+        required: true
+        default: "1.0"
+        type: string
+      images:
+        description: "Comma-separated image names (empty = all)"
+        required: false
+        default: ""
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - "custom-images/**"
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/cloudification-io
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.result }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build matrix from images.yaml
+        id: matrix
+        env:
+          RELEASE: ${{ inputs.openstack_release || '2025.1' }}
+          TOOLS: ${{ inputs.tools_version || '1.0' }}
+          FILTER: ${{ inputs.images }}
+        run: |
+          # Read YAML, substitute templates, prefix paths, output as JSON
+          MATRIX=$(yq -o=json '
+            {
+              "include": [.images[] | {
+                "name": .name,
+                "dockerfile": ("custom-images/" + .dockerfile),
+                "context": ("custom-images/" + .context),
+                "tag_prefix": .tag_template
+              }]
+            }' custom-images/images.yaml | \
+            sed "s/{release}/$RELEASE/g; s/{tools_version}/$TOOLS/g")
+
+          # Filter by image names if requested
+          if [ -n "$FILTER" ]; then
+            MATRIX=$(echo "$MATRIX" | jq -c --arg f "$FILTER" '
+              .include |= [ .[] | select(.name as $n | ($f | split(",") | map(gsub("\\s";"")) | index($n)) != null) ]')
+          fi
+
+          echo "result=$(echo "$MATRIX" | jq -c)" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: setup
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate timestamp tag
+        id: tag
+        env:
+          TAG_PREFIX: ${{ matrix.tag_prefix }}
+        run: |
+          TIMESTAMP=$(date -u +%Y%m%d%H%M%S)
+          echo "timestamp=$TIMESTAMP" >> "$GITHUB_OUTPUT"
+          echo "full_tag=${TAG_PREFIX}-${TIMESTAMP}" >> "$GITHUB_OUTPUT"
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_PREFIX }}/${{ matrix.name }}
+          tags: |
+            type=raw,value=${{ steps.tag.outputs.full_tag }}
+            type=raw,value=${{ matrix.tag_prefix }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            OPENSTACK_RELEASE=${{ inputs.openstack_release || '2025.1' }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Add to job summary
+        env:
+          IMAGE_NAME: ${{ matrix.name }}
+          FULL_TAG: ${{ steps.tag.outputs.full_tag }}
+        run: |
+          echo "### ${IMAGE_NAME}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "${IMAGE_PREFIX}/${IMAGE_NAME}:${FULL_TAG}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"

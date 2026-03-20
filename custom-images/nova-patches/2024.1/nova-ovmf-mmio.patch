@@ -1,0 +1,233 @@
+From 54720000e6755201501ec2cc33df0e0b2c0e999c Mon Sep 17 00:00:00 2001
+From: Maksim Shepelev <max.shepelev@cloudification.io>
+Date: Fri, 24 Jan 2025 17:23:36 +0100
+Subject: [PATCH] Add libvirt commandline args with OVMF mmio size
+
+---
+ nova/tests/unit/virt/libvirt/test_config.py | 12 +++
+ nova/tests/unit/virt/libvirt/test_driver.py | 94 +++++++++++++++++++++
+ nova/virt/libvirt/config.py                 | 25 ++++++
+ nova/virt/libvirt/driver.py                 | 15 ++++
+ 4 files changed, 146 insertions(+)
+
+diff --git a/nova/tests/unit/virt/libvirt/test_config.py b/nova/tests/unit/virt/libvirt/test_config.py
+index b91c685571..2650e558bf 100644
+--- a/nova/tests/unit/virt/libvirt/test_config.py
++++ b/nova/tests/unit/virt/libvirt/test_config.py
+@@ -2566,6 +2566,8 @@ class LibvirtConfigGuestTest(LibvirtConfigBaseTest):
+         obj = config.LibvirtConfigGuestSEVLaunchSecurity()
+         obj.cbitpos = 47
+         obj.reduced_phys_bits = 1
++        obj.commandline = config.LibvirtConfigGuestQemuCommandLine(
++            mmio_size=65536)
+ 
+         xml = obj.to_xml()
+         launch_security_expected = """
+@@ -2577,6 +2579,16 @@ class LibvirtConfigGuestTest(LibvirtConfigBaseTest):
+ 
+         self.assertXmlEqual(launch_security_expected, xml)
+ 
++    def test_config_mmio_size(self):
++        expected_xml = """
++        <commandline xmlns="http://libvirt.org/schemas/domain/qemu/1.0">
++          <arg value='-fw_cfg'/>
++          <arg value='opt/ovmf/X-PciMmio64Mb,string=65536'/>
++        </commandline>"""
++        obj = config.LibvirtConfigGuestQemuCommandLine(mmio_size=65536)
++        xml = obj.to_xml()
++        self.assertXmlEqual(xml, expected_xml)
++
+     def test_config_lxc(self):
+         obj = config.LibvirtConfigGuest()
+         obj.virt_type = "lxc"
+diff --git a/nova/tests/unit/virt/libvirt/test_driver.py b/nova/tests/unit/virt/libvirt/test_driver.py
+index b9ce37c3d0..7940e6b7ba 100644
+--- a/nova/tests/unit/virt/libvirt/test_driver.py
++++ b/nova/tests/unit/virt/libvirt/test_driver.py
+@@ -2755,6 +2755,100 @@ class LibvirtConnTestCase(test.NoDBTestCase,
+         # i440fx is not pcie machine so there should be no pcie ports
+         self.assertEqual(0, num_ports)
+ 
++    @ddt.unpack
++    @ddt.data(
++        {
++            'config': {},
++            'os_type': 'linux',
++            'hw_firmware_type': 'uefi',
++            'alias': 'a2:1',
++            'mmio_size': None,
++        },
++        {
++            'config': {},
++            'os_type': 'windows',
++            'hw_firmware_type': 'bios',
++            'alias': 'a2:1',
++            'mmio_size': None,
++        },
++        {
++            'config': {},
++            'os_type': 'windows',
++            'hw_firmware_type': 'bios',
++            'alias': 'a2:3',
++            'mmio_size': 131072,
++        },
++        {
++            'config': {},
++            'os_type': 'windows',
++            'hw_firmware_type': 'uefi',
++            'alias': 'a2:1',
++            'mmio_size': 65536,
++        },
++        {
++            'config': {},
++            'os_type': 'linux',
++            'hw_firmware_type': 'uefi',
++            'alias': 'a2:1',
++            'mmio_size': 131072,
++        },
++    )
++    def test_get_guest_mmio_size(
++            self, config, os_type, hw_firmware_type, alias, mmio_size):
++
++        for config_opt, config_val in config.items():
++            self.flags(**{config_opt: config_val}, group='libvirt')
++
++        drvr = libvirt_driver.LibvirtDriver(fake.FakeVirtAPI(), True)
++        ctxt = context.RequestContext(project_id=123,
++                                      project_name="aubergine",
++                                      user_id=456,
++                                      user_name="pie")
++
++        if mmio_size is None:
++            flavor = objects.Flavor(name='m1.small',
++                                    memory_mb=6,
++                                    vcpus=28,
++                                    root_gb=496,
++                                    ephemeral_gb=8128,
++                                    swap=33550336,
++                                    extra_specs={
++                                        "pci_passthrough:alias": alias
++                                    })
++        else:
++            flavor = objects.Flavor(name='m1.small',
++                                    memory_mb=6,
++                                    vcpus=28,
++                                    root_gb=496,
++                                    ephemeral_gb=8128,
++                                    swap=33550336,
++                                    extra_specs={
++                                        "pci_passthrough:alias": alias,
++                                        "hw:ovmf_mmio_size_mb": mmio_size})
++        instance_ref = objects.Instance(**self.test_instance)
++        instance_ref['os_type'] = os_type
++        instance_ref.flavor = flavor
++        image_meta = objects.ImageMeta.from_dict({
++            "disk_format": "raw",
++            "properties": {"hw_firmware_type": hw_firmware_type},
++        })
++
++        disk_info = blockinfo.get_disk_info(CONF.libvirt.virt_type,
++                                            instance_ref,
++                                            image_meta)
++
++        cfg = drvr._get_guest_config(instance_ref,
++                                     _fake_network_info(self, 1),
++                                     image_meta, disk_info,
++                                     context=ctxt)
++
++        if mmio_size is None or hw_firmware_type == 'bios':
++            expected_str = 'opt/ovmf/X-PciMmio64Mb,string='
++            self.assertNotIn(expected_str, str(cfg))
++        else:
++            expected_str = f'opt/ovmf/X-PciMmio64Mb,string={mmio_size}'
++            self.assertIn(expected_str, str(cfg))
++
+     @mock.patch.object(time, "time")
+     def test_get_guest_config_no_pcie_ports(self, time_mock):
+         """Generate a "standard" guest with minimal configuration.
+diff --git a/nova/virt/libvirt/config.py b/nova/virt/libvirt/config.py
+index ff1eb925b2..eff959052d 100644
+--- a/nova/virt/libvirt/config.py
++++ b/nova/virt/libvirt/config.py
+@@ -120,6 +120,27 @@ class LibvirtConfigObject(object):
+         return self.to_xml(pretty_print=False)
+ 
+ 
++class LibvirtConfigGuestQemuCommandLine(LibvirtConfigObject):
++
++    def __init__(self, mmio_size=None):
++        super(LibvirtConfigGuestQemuCommandLine, self).__init__(
++            root_name='commandline',
++            ns_uri="http://libvirt.org/schemas/domain/qemu/1.0")
++        self.mmio_size = mmio_size
++
++    def format_dom(self):
++        args = super(LibvirtConfigGuestQemuCommandLine, self).format_dom()
++        qemu_values = []
++        if self.mmio_size:
++            qemu_values.extend([
++                '-fw_cfg',
++                'opt/ovmf/X-PciMmio64Mb,string={}'.format(self.mmio_size)
++            ])
++        for value in qemu_values:
++            args.append(self._new_node("arg", value=value))
++        return args
++
++
+ class LibvirtConfigCaps(LibvirtConfigObject):
+ 
+     def __init__(self, **kwargs):
+@@ -3005,6 +3026,7 @@ class LibvirtConfigGuest(LibvirtConfigObject):
+ 
+         self.virt_type = None
+         self.uuid = None
++        self.commandline = None
+         self.name = None
+         self.memory = 500 * units.Mi
+         self.max_memory_size = None
+@@ -3186,6 +3208,9 @@ class LibvirtConfigGuest(LibvirtConfigObject):
+         if self.clock is not None:
+             root.append(self.clock.format_dom())
+ 
++        if self.commandline is not None:
++            root.append(self.commandline.format_dom())
++
+         if self.cpu is not None:
+             root.append(self.cpu.format_dom())
+ 
+diff --git a/nova/virt/libvirt/driver.py b/nova/virt/libvirt/driver.py
+index 9c97804770..558646296e 100644
+--- a/nova/virt/libvirt/driver.py
++++ b/nova/virt/libvirt/driver.py
+@@ -7400,6 +7400,8 @@ class LibvirtDriver(driver.ComputeDriver):
+         if mdevs:
+             self._guest_add_mdevs(guest, mdevs)
+ 
++        self._guest_add_commandline(guest, flavor, instance, image_meta)
++
+         if sev_enabled:
+             caps = self._host.get_capabilities()
+             self._guest_configure_sev(guest, caps.host.cpu.arch,
+@@ -7412,6 +7414,19 @@ class LibvirtDriver(driver.ComputeDriver):
+ 
+         return guest
+ 
++    def _guest_add_commandline(self, guest, flavor, instance, image_meta):
++        mmio_size = None
++        hw_firmware_type = image_meta.properties.get(
++            'hw_firmware_type')
++        if (hw_firmware_type == fields.FirmwareType.UEFI):
++            mmio_size = flavor.extra_specs.get('hw:ovmf_mmio_size_mb')
++            if mmio_size is not None:
++                mmio_size = int(mmio_size)
++
++        if mmio_size:
++            guest.commandline = vconfig.LibvirtConfigGuestQemuCommandLine(
++                mmio_size=mmio_size)
++
+     def _get_ordered_vpmems(self, instance, flavor):
+         resources = self._get_resources(instance)
+         ordered_vpmem_resources = self._get_ordered_vpmem_resources(
+-- 
+2.39.3 (Apple Git-146)
+

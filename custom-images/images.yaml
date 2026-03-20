@@ -1,0 +1,84 @@
+# OpenStack components — ubuntu_noble base from quay.io/airshipit
+images:
+  - name: horizon
+    dockerfile: dockerfiles/horizon.Dockerfile
+    context: .
+    tag_template: "{release}-ubuntu_noble"
+
+  - name: nova
+    dockerfile: dockerfiles/nova.Dockerfile
+    context: .
+    tag_template: "{release}-ubuntu_noble"
+
+  - name: octavia
+    dockerfile: dockerfiles/octavia.Dockerfile
+    context: .
+    tag_template: "{release}-ubuntu_noble"
+
+  - name: masakari
+    dockerfile: dockerfiles/masakari.Dockerfile
+    context: .
+    tag_template: "{release}-ubuntu_noble"
+
+  - name: masakari-monitors
+    dockerfile: dockerfiles/masakari-monitors.Dockerfile
+    context: .
+    tag_template: "{release}-ubuntu_noble"
+
+  - name: cinder
+    dockerfile: dockerfiles/cinder.Dockerfile
+    context: .
+    tag_template: "{release}-ubuntu_noble"
+
+  - name: glance
+    dockerfile: dockerfiles/glance.Dockerfile
+    context: .
+    tag_template: "{release}-ubuntu_noble"
+
+  - name: keystone
+    dockerfile: dockerfiles/keystone.Dockerfile
+    context: .
+    tag_template: "{release}-ubuntu_noble"
+
+  - name: neutron
+    dockerfile: dockerfiles/neutron.Dockerfile
+    context: .
+    tag_template: "{release}-ubuntu_noble"
+
+  - name: cloudkitty
+    dockerfile: dockerfiles/cloudkitty.Dockerfile
+    context: .
+    tag_template: "{release}-ubuntu_noble"
+
+  - name: designate
+    dockerfile: dockerfiles/designate.Dockerfile
+    context: .
+    tag_template: "{release}-ubuntu_noble"
+
+  - name: libvirt
+    dockerfile: dockerfiles/libvirt.Dockerfile
+    context: .
+    tag_template: "{release}-ubuntu_noble"
+
+  # OVS uses a fixed "latest" base tag — not tied to a specific OpenStack release
+  - name: openvswitch
+    dockerfile: dockerfiles/openvswitch.Dockerfile
+    context: .
+    tag_template: "latest-ubuntu_noble"
+
+  # Gnocchi sources from quay.io/openstack.kolla (not airshipit) — uses dash, not underscore
+  - name: gnocchi-api
+    dockerfile: dockerfiles/gnocchi-api.Dockerfile
+    context: .
+    tag_template: "{release}-ubuntu-noble"
+
+  # Standalone builds — different base images and versioning
+  - name: openstack-tools
+    dockerfile: openstack-tools/Dockerfile
+    context: openstack-tools
+    tag_template: "{tools_version}-{release}"
+
+  - name: coredns-k8s-gateway
+    dockerfile: coredns-k8s-gateway/Dockerfile
+    context: coredns-k8s-gateway
+    tag_template: "1.11.1"
