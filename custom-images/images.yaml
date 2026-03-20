@@ -92,7 +92,7 @@ images:
     paths:
       - openvswitch/
 
-  # Gnocchi sources from quay.io/openstack.kolla (not airshipit) — uses dash, not underscore
+  # Gnocchi sources from quay.io/openstack.kolla (airshipit image doesn't exist) — uses dash, not underscore
   - name: gnocchi-api
     dockerfile: gnocchi-api/Dockerfile
     context: gnocchi-api
