@@ -29,3 +29,55 @@ bash custom-images/build-local.sh
 ```
 
 Available image names can be found in [images.yaml](custom-images/images.yaml).
+
+## Mirroring images to Docker Hub
+
+Mirror images from `ghcr.io/cloudification-io` to `docker.io/cloudification` using [skopeo](https://github.com/containers/skopeo). The script discovers packages dynamically via the GitHub API.
+
+### Prerequisites
+
+```bash
+gh auth login
+skopeo login ghcr.io
+skopeo login docker.io
+```
+
+### Mirror all images
+
+```bash
+bash custom-images/mirror-to-dockerhub.sh
+```
+
+Preview what would be mirrored without actually copying:
+
+```bash
+DRY_RUN=true bash custom-images/mirror-to-dockerhub.sh
+```
+
+### Mirror specific images
+
+```bash
+IMAGES=nova,horizon bash custom-images/mirror-to-dockerhub.sh
+```
+
+### Mirror modes
+
+By default all tags are mirrored (`MIRROR_MODE=all`). To mirror only clean (non-timestamped) tags:
+
+```bash
+MIRROR_MODE=clean bash custom-images/mirror-to-dockerhub.sh
+```
+
+Or only the latest timestamped tag per image:
+
+```bash
+MIRROR_MODE=latest-timestamped bash custom-images/mirror-to-dockerhub.sh
+```
+
+### Including coredns
+
+`coredns-k8s-gateway` is excluded by default. To include it:
+
+```bash
+EXCLUDE_IMAGES="" bash custom-images/mirror-to-dockerhub.sh
+```
