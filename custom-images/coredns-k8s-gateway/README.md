@@ -6,5 +6,5 @@ This is patched version of CoreDNS with enabled plugins:
 
 ## How to build and push
 ```bash
-docker build -t cloudification/coredns-k8s-gateway .
+docker build -f Dockerfile.v1.14.2 -t cloudification/coredns-k8s-gateway .
 ```

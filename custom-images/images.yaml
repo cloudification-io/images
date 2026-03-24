@@ -109,8 +109,15 @@ images:
       - openstack-tools/
 
   - name: coredns-k8s-gateway
-    dockerfile: coredns-k8s-gateway/Dockerfile
+    dockerfile: coredns-k8s-gateway/Dockerfile.v1.11.1
     context: coredns-k8s-gateway
     tag_template: "1.11.1"
+    paths:
+      - coredns-k8s-gateway/
+
+  - name: coredns-k8s-gateway
+    dockerfile: coredns-k8s-gateway/Dockerfile.v1.14.2
+    context: coredns-k8s-gateway
+    tag_template: "1.14.2"
     paths:
       - coredns-k8s-gateway/
