@@ -1,0 +1,49 @@
+name: Mirror upstream images
+
+on:
+  workflow_dispatch:
+    inputs:
+      images:
+        description: "Comma-separated image names (empty = all)"
+        required: false
+        default: ""
+        type: string
+      suffix:
+        description: "Suffix for dest tags"
+        required: false
+        default: ""
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - "mirror-images.yaml"
+
+env:
+  IMAGE_PREFIX: ghcr.io/cloudification-io
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Log in to ghcr.io
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: skopeo login ghcr.io -u "$GHCR_USER" --password-stdin <<< "$GHCR_TOKEN"
+
+      - name: Generate default suffix
+        id: suffix
+        env:
+          INPUT_SUFFIX: ${{ inputs.suffix }}
+        run: echo "value=${INPUT_SUFFIX:--$(date -u +%Y%m%d)}" >> "$GITHUB_OUTPUT"
+
+      - name: Mirror images
+        env:
+          IMAGES: ${{ inputs.images }}
+          SUFFIX: ${{ steps.suffix.outputs.value }}
+        run: ./mirror-to-ghcr.sh
