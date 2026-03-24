@@ -77,6 +77,27 @@ images:
     paths:
       - designate/
 
+  - name: barbican
+    dockerfile: barbican/Dockerfile
+    context: barbican
+    tag_template: "{release}-ubuntu_noble"
+    paths:
+      - barbican/
+
+  - name: heat
+    dockerfile: heat/Dockerfile
+    context: heat
+    tag_template: "{release}-ubuntu_noble"
+    paths:
+      - heat/
+
+  - name: placement
+    dockerfile: placement/Dockerfile
+    context: placement
+    tag_template: "{release}-ubuntu_noble"
+    paths:
+      - placement/
+
   - name: libvirt
     dockerfile: libvirt/Dockerfile
     context: libvirt
