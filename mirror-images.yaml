@@ -1,0 +1,69 @@
+# Upstream images mirrored to ghcr.io/cloudification-io (no Dockerfile — pull and re-push)
+#
+# Each tag entry copies source:tag -> ghcr:name:tag.
+# Optional "alias" also pushes the same image as ghcr:name:alias (e.g. a clean "latest" tag).
+images:
+  # OSH images
+  - name: ceph-config-helper
+    source: quay.io/airshipit/ceph-config-helper
+    tags:
+      - tag: ubuntu_jammy_20.2.0-1-20260323
+      - tag: ubuntu_jammy_19.2.3-1-20260116
+      
+  - name: ovn
+    source: quay.io/airshipit/ovn
+    tags:
+      - tag: ubuntu_noble-20260324
+        alias: ubuntu_noble
+      - tag: ubuntu_jammy-20260324
+        alias: ubuntu_jammy
+
+  - name: kubernetes-entrypoint
+    source: quay.io/airshipit/kubernetes-entrypoint
+    tags:
+      - tag: 15b84102d9f2d106657412054aac29b5c6fbdba4-ubuntu_noble
+
+  # Kolla images
+  - name: designate-backend-bind9
+    source: quay.io/openstack.kolla/designate-backend-bind9
+    suffix_tag: true
+    tags:
+      - tag: 2025.1-ubuntu-noble
+
+  - name: ceilometer-central
+    source: quay.io/openstack.kolla/ceilometer-central
+    suffix_tag: true
+    tags:
+      - tag: 2025.1-ubuntu-noble
+
+  - name: ceilometer-compute
+    source: quay.io/openstack.kolla/ceilometer-compute
+    suffix_tag: true
+    tags:
+      - tag: 2025.1-ubuntu-noble
+
+  - name: ceilometer-notification
+    source: quay.io/openstack.kolla/ceilometer-notification
+    suffix_tag: true
+    tags:
+      - tag: 2025.1-ubuntu-noble
+
+# NOTE: we build custom image with uwsgi
+# See custom-images/gnocchi-api
+#  - name: gnocchi-api
+#    source: quay.io/openstack.kolla/gnocchi-api
+#    suffix_tag: true
+#    tags:
+#      - tag: 2025.1-ubuntu-noble
+
+  - name: gnocchi-metricd
+    source: quay.io/openstack.kolla/gnocchi-metricd
+    suffix_tag: true
+    tags:
+      - tag: 2025.1-ubuntu-noble
+
+  - name: gnocchi-statsd
+    source: quay.io/openstack.kolla/gnocchi-statsd
+    suffix_tag: true
+    tags:
+      - tag: 2025.1-ubuntu-noble
