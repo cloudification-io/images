@@ -11,6 +11,7 @@ set -euo pipefail
 #   IMAGES=nova,horizon ./mirror-to-dockerhub.sh           # specific images only
 #   MIRROR_MODE=clean ./mirror-to-dockerhub.sh             # skip timestamped tags
 #   EXCLUDE_IMAGES="" ./mirror-to-dockerhub.sh             # include coredns too
+#   FORCE=true ./mirror-to-dockerhub.sh                    # skip digest check, copy everything
 
 SOURCE_REGISTRY="${SOURCE_REGISTRY:-ghcr.io/cloudification-io}"
 DEST_REGISTRY="${DEST_REGISTRY:-docker.io/cloudification}"
@@ -19,9 +20,16 @@ IMAGES="${IMAGES:-}"
 EXCLUDE_IMAGES="${EXCLUDE_IMAGES:-coredns-k8s-gateway}"
 MIRROR_MODE="${MIRROR_MODE:-all}"
 DRY_RUN="${DRY_RUN:-false}"
+FORCE="${FORCE:-false}"
 
 is_timestamp_tag() {
     [[ "$1" =~ -[0-9]{14}$ ]]
+}
+
+get_manifest_digest() {
+    local raw
+    raw=$(skopeo inspect --raw "docker://$1" 2>/dev/null) || return 0
+    printf '%s' "$raw" | sha256sum | awk '{print $1}'
 }
 
 filter_tags() {
@@ -49,7 +57,7 @@ filter_tags() {
     esac
 }
 
-for cmd in gh skopeo; do
+for cmd in gh skopeo sha256sum; do
     if ! command -v "$cmd" &>/dev/null; then
         echo "ERROR: $cmd is not installed" >&2
         exit 1
@@ -62,6 +70,7 @@ echo "Mirror mode:  $MIRROR_MODE"
 [[ -n "$IMAGES" ]] && echo "Include:      $IMAGES"
 [[ -n "$EXCLUDE_IMAGES" ]] && echo "Exclude:      $EXCLUDE_IMAGES"
 [[ "$DRY_RUN" == "true" ]] && echo "*** DRY RUN ***"
+[[ "$FORCE" == "true" ]] && echo "*** FORCE (skip digest check) ***"
 echo ""
 
 PACKAGES=$(gh api --paginate \
@@ -69,6 +78,7 @@ PACKAGES=$(gh api --paginate \
     --jq '.[].name')
 
 MIRRORED=()
+SKIPPED=()
 FAILED=()
 
 while IFS= read -r package; do
@@ -113,6 +123,18 @@ while IFS= read -r package; do
             continue
         fi
 
+        if [[ "$FORCE" != "true" ]]; then
+            dst_digest=$(get_manifest_digest "${DEST_REGISTRY}/${package}:${tag}")
+            if [[ -n "$dst_digest" ]]; then
+                src_digest=$(get_manifest_digest "${SOURCE_REGISTRY}/${package}:${tag}")
+                if [[ -n "$src_digest" && "$src_digest" == "$dst_digest" ]]; then
+                    echo "  $tag  (up-to-date, skipped)"
+                    SKIPPED+=("${DEST_REGISTRY}/${package}:${tag}")
+                    continue
+                fi
+            fi
+        fi
+
         echo "  $tag"
         if skopeo copy --all --retry-times 3 "$src" "$dst"; then
             MIRRORED+=("${DEST_REGISTRY}/${package}:${tag}")
@@ -131,6 +153,11 @@ else
     echo "Mirrored: ${#MIRRORED[@]} image(s)"
 fi
 [[ ${#MIRRORED[@]} -gt 0 ]] && printf '  %s\n' "${MIRRORED[@]}"
+
+if [[ ${#SKIPPED[@]} -gt 0 ]]; then
+    echo "Skipped:  ${#SKIPPED[@]} (already up-to-date)"
+    printf '  %s\n' "${SKIPPED[@]}"
+fi
 
 if [[ ${#FAILED[@]} -gt 0 ]]; then
     echo "Failed:   ${#FAILED[@]}"
