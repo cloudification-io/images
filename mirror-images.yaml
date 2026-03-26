@@ -9,7 +9,7 @@ images:
     tags:
       - tag: ubuntu_jammy_20.2.0-1-20260323
       - tag: ubuntu_jammy_19.2.3-1-20260116
-      
+
   - name: ovn
     source: quay.io/airshipit/ovn
     tags:
@@ -55,6 +55,12 @@ images:
 #    suffix_tag: true
 #    tags:
 #      - tag: 2025.1-ubuntu-noble
+
+  - name: gnocchi-base
+    source: quay.io/openstack.kolla/gnocchi-base
+    suffix_tag: true
+    tags:
+      - tag: 2025.1-ubuntu-noble
 
   - name: gnocchi-metricd
     source: quay.io/openstack.kolla/gnocchi-metricd
