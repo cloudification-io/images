@@ -120,6 +120,23 @@ for row in $(echo "$MATRIX" | jq -r '.include[] | @base64'); do
     fi
 
 
+    # Also tag with the original (unsuffixed) tag
+    if [[ "$dst_tag" != "$tag" ]]; then
+        dst_orig="docker://${IMAGE_PREFIX}/${name}:${tag}"
+        echo "  also: ${IMAGE_PREFIX}/${name}:${tag}"
+
+        if [[ "$DRY_RUN" != "true" ]]; then
+            if skopeo copy --all --retry-times 3 "$src" "$dst_orig"; then
+                MIRRORED+=("${IMAGE_PREFIX}/${name}:${tag}")
+            else
+                echo "  WARN: failed to copy original tag" >&2
+                FAILED+=("${source}:${tag} (original tag)")
+            fi
+        else
+            MIRRORED+=("${IMAGE_PREFIX}/${name}:${tag}")
+        fi
+    fi
+
     if [[ -n "$alias" ]]; then
         dst_alias="docker://${IMAGE_PREFIX}/${name}:${alias}"
         echo "  alias: ${IMAGE_PREFIX}/${name}:${alias}"
