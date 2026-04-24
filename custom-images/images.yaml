@@ -7,6 +7,13 @@ images:
     paths:
       - horizon/
 
+  - name: horizon-2025
+    dockerfile: horizon/Dockerfile.2025
+    context: horizon
+    tag_template: "{release}-ubuntu_noble"
+    paths:
+      - horizon/
+
   - name: nova
     dockerfile: nova/Dockerfile
     context: nova
