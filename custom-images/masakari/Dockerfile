@@ -5,4 +5,6 @@ FROM quay.io/airshipit/masakari:${BASE_TAG}
 ARG OPENSTACK_RELEASE
 ARG CONSTRAINTS=https://raw.githubusercontent.com/openstack/requirements/stable/${OPENSTACK_RELEASE}/upper-constraints.txt
 
-RUN pip install -c ${CONSTRAINTS} jaeger-client
+RUN pip install -c ${CONSTRAINTS} \
+  cryptography \
+  jaeger-client
