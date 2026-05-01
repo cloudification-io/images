@@ -20,7 +20,6 @@ RUN apt-get update && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
 
-
 RUN pip install -c ${CONSTRAINTS} python-cloudkittyclient
 RUN pip install -c ${CONSTRAINTS} masakari-dashboard
 RUN pip install -c ${CONSTRAINTS} designate-dashboard
