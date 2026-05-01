@@ -43,7 +43,6 @@ for ((i=0; i<IMAGE_COUNT; i++)); do
 
     $DOCKER_BUILD \
         --build-arg OPENSTACK_RELEASE="$OPENSTACK_RELEASE" \
-        --build-arg GITHUB_TOKEN=$GITHUB_TOKEN \
         -t "$FULL_TAG" \
         -f "$SCRIPT_DIR/$dockerfile" \
         "$SCRIPT_DIR/$context"

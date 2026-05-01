@@ -5,14 +5,13 @@ FROM docker.io/cloudification/horizon:2025.1-ubuntu_noble-20260324183048
 ARG OPENSTACK_RELEASE
 ARG CONSTRAINTS=https://raw.githubusercontent.com/openstack/requirements/stable/${OPENSTACK_RELEASE}/upper-constraints.txt
 ARG CONSTRAINTS_2024_1=https://opendev.org/openstack/requirements/raw/branch/unmaintained/2024.1/upper-constraints.txt
-
-ARG GITHUB_TOKEN
+ARG BARBICAN_UI_REF=main
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends build-essential python3-dev git && \
     pip install -c ${CONSTRAINTS_2024_1} octavia-dashboard && \
-    git clone -b main --single-branch https://$GITHUB_TOKEN@github.com/cloudification-io/barbican-ui.git && \
-    cd barbican-ui && pip install . && cd .. && rm -rf barbican-ui && \
+    pip install -c ${CONSTRAINTS} \
+        "barbican-ui @ git+https://github.com/cloudification-io/barbican-ui.git@${BARBICAN_UI_REF}" && \
     apt-get purge -y build-essential python3-dev && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*

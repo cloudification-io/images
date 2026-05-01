@@ -5,19 +5,17 @@ FROM quay.io/airshipit/horizon:${BASE_TAG}
 ARG OPENSTACK_RELEASE
 ARG CONSTRAINTS=https://raw.githubusercontent.com/openstack/requirements/stable/${OPENSTACK_RELEASE}/upper-constraints.txt
 ARG CONSTRAINTS_2024_1=https://opendev.org/openstack/requirements/raw/branch/unmaintained/2024.1/upper-constraints.txt
-
-ARG GITHUB_TOKEN
+ARG CLOUDKITTY_DASHBOARD_REF=stable/${OPENSTACK_RELEASE}
+ARG BARBICAN_UI_REF=main
 
 RUN pip install -c ${CONSTRAINTS} jaeger-client
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends build-essential python3-dev git && \
     pip install -c ${CONSTRAINTS_2024_1} octavia-dashboard && \
-    git clone -b stable/${OPENSTACK_RELEASE} \
-        --single-branch https://git.openstack.org/openstack/cloudkitty-dashboard.git && \
-    cd cloudkitty-dashboard && python setup.py install && cd .. && rm -rf cloudkitty-dashboard && \
-    git clone -b main --single-branch https://$GITHUB_TOKEN@github.com/cloudification-io/barbican-ui.git && \
-    cd barbican-ui && pip install . && cd .. && rm -rf barbican-ui && \
+    pip install -c ${CONSTRAINTS} \
+        "cloudkitty-dashboard @ git+https://opendev.org/openstack/cloudkitty-dashboard.git@${CLOUDKITTY_DASHBOARD_REF:-stable/${OPENSTACK_RELEASE}}" \
+        "barbican-ui @ git+https://github.com/cloudification-io/barbican-ui.git@${BARBICAN_UI_REF}" && \
     apt-get purge -y build-essential python3-dev && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
@@ -28,4 +26,3 @@ RUN pip install -c ${CONSTRAINTS} masakari-dashboard
 RUN pip install -c ${CONSTRAINTS} designate-dashboard
 RUN pip install -c ${CONSTRAINTS} heat-dashboard
 RUN pip install oslo.policy==4.3.0
-
