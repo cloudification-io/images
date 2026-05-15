@@ -7,13 +7,14 @@ images:
   - name: ceph-config-helper
     source: quay.io/airshipit/ceph-config-helper
     tags:
+      - tag: ubuntu_jammy_20.2.1-1-20260515
       - tag: ubuntu_jammy_20.2.0-1-20260323
       - tag: ubuntu_jammy_19.2.3-1-20260116
 
   - name: ovn
     source: quay.io/airshipit/ovn
     tags:
-      - tag: ubuntu_noble-20260324
+      - tag: ubuntu_noble-20260515
         alias: ubuntu_noble
       - tag: ubuntu_jammy-20260324
         alias: ubuntu_jammy
