@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-ARG OPENSTACK_RELEASE=2025.1
+ARG OPENSTACK_RELEASE=2026.1
 ARG BASE_TAG=${OPENSTACK_RELEASE}-ubuntu_noble
 
 FROM quay.io/airshipit/horizon:${BASE_TAG} AS upstream
@@ -10,8 +10,8 @@ COPY --from=upstream /var/lib/openstack /var/lib/openstack
 
 ARG OPENSTACK_RELEASE
 ARG CLOUDKITTY_DASHBOARD_REF=stable/${OPENSTACK_RELEASE}
+ARG OCTAVIA_DASHBOARD_REF=stable/${OPENSTACK_RELEASE}
 ARG BARBICAN_UI_REF=main
-ARG OCTAVIA_DASHBOARD_REF=stable/2026.1
 
 RUN uv pip install -c /upper-constraints.txt \
         jaeger-client \

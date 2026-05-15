@@ -74,17 +74,22 @@ jobs:
               "dockerfile": ("custom-images/" + .dockerfile),
               "context": ("custom-images/" + .context),
               "tag_prefix": .tag_template,
+              "release": (.release // ""),
               "paths": (.paths // [])
             }]
           }' custom-images/images.yaml)
 
-          # Substitute release/version templates using jq (not sed)
+          # Compute effective release per image (per-image override wins, else global $release),
+          # then substitute {release}/{tools_version} placeholders.
           MATRIX=$(echo "$MATRIX" | jq -c \
             --arg release "$RELEASE" \
             --arg tools "$TOOLS" \
-            '.include |= [.[] | .tag_prefix |= (gsub("{release}"; $release) | gsub("{tools_version}"; $tools)) |
-                                 .dockerfile |= gsub("{release}"; $release) |
-                                 .context |= gsub("{release}"; $release)]')
+            '.include |= [.[] |
+              ((if .release == "" then $release else .release end) as $eff |
+               .effective_release = $eff |
+               .tag_prefix |= (gsub("{release}"; $eff) | gsub("{tools_version}"; $tools)) |
+               .dockerfile |= gsub("{release}"; $eff) |
+               .context |= gsub("{release}"; $eff))]')
 
           # Filter by image names if requested (workflow_dispatch)
           if [ -n "$FILTER" ]; then
@@ -113,8 +118,8 @@ jobs:
             fi
           fi
 
-          # Remove paths from final matrix (not needed by build job)
-          MATRIX=$(echo "$MATRIX" | jq -c '.include |= [.[] | del(.paths)]')
+          # Remove paths and raw release field from final matrix (build job consumes effective_release)
+          MATRIX=$(echo "$MATRIX" | jq -c '.include |= [.[] | del(.paths, .release)]')
 
           IMAGE_COUNT=$(echo "$MATRIX" | jq '.include | length')
           echo "Images to build: $IMAGE_COUNT"
@@ -179,7 +184,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            OPENSTACK_RELEASE=${{ inputs.openstack_release || '2025.1' }}
+            OPENSTACK_RELEASE=${{ matrix.effective_release }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

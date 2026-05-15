@@ -29,9 +29,10 @@ for ((i=0; i<IMAGE_COUNT; i++)); do
     dockerfile=$(yq ".images[$i].dockerfile" "$SCRIPT_DIR/images.yaml")
     context=$(yq ".images[$i].context" "$SCRIPT_DIR/images.yaml")
     tag_template=$(yq ".images[$i].tag_template" "$SCRIPT_DIR/images.yaml")
+    image_release=$(yq ".images[$i].release // \"$OPENSTACK_RELEASE\"" "$SCRIPT_DIR/images.yaml")
 
     # Substitute template placeholders
-    tag_prefix=$(echo "$tag_template" | sed "s/{release}/$OPENSTACK_RELEASE/g; s/{tools_version}/$TOOLS_VERSION/g")
+    tag_prefix=$(echo "$tag_template" | sed "s/{release}/$image_release/g; s/{tools_version}/$TOOLS_VERSION/g")
 
     # Filter if IMAGES is set
     if [[ -n "$IMAGES" ]] && ! echo ",$IMAGES," | grep -q ",$name,"; then
@@ -42,7 +43,7 @@ for ((i=0; i<IMAGE_COUNT; i++)); do
     echo "======== Building: $name → $FULL_TAG"
 
     $DOCKER_BUILD \
-        --build-arg OPENSTACK_RELEASE="$OPENSTACK_RELEASE" \
+        --build-arg OPENSTACK_RELEASE="$image_release" \
         -t "$FULL_TAG" \
         -f "$SCRIPT_DIR/$dockerfile" \
         "$SCRIPT_DIR/$context"

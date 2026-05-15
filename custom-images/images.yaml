@@ -4,6 +4,7 @@ images:
     dockerfile: horizon/Dockerfile
     context: horizon
     tag_template: "{release}-ubuntu_noble"
+    release: "2026.1"
     paths:
       - horizon/
 
