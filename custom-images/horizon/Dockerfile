@@ -11,6 +11,7 @@ COPY --from=upstream /var/lib/openstack /var/lib/openstack
 ARG OPENSTACK_RELEASE
 ARG CLOUDKITTY_DASHBOARD_REF=stable/${OPENSTACK_RELEASE}
 ARG BARBICAN_UI_REF=main
+ARG OCTAVIA_DASHBOARD_REF=stable/2026.1
 
 RUN uv pip install -c /upper-constraints.txt \
         jaeger-client \
@@ -18,7 +19,7 @@ RUN uv pip install -c /upper-constraints.txt \
         masakari-dashboard \
         designate-dashboard \
         heat-dashboard \
-        octavia-dashboard \
+        "octavia-dashboard @ git+https://opendev.org/openstack/octavia-dashboard.git@${OCTAVIA_DASHBOARD_REF}" \
         "cloudkitty-dashboard @ git+https://opendev.org/openstack/cloudkitty-dashboard.git@${CLOUDKITTY_DASHBOARD_REF}" \
         "barbican-ui @ git+https://github.com/cloudification-io/barbican-ui.git@${BARBICAN_UI_REF}" \
  && uv pip install oslo.policy==4.3.0
