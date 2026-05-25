@@ -18,5 +18,5 @@ RUN cd /var/lib/openstack/lib/python3.12/site-packages \
 FROM quay.io/airshipit/nova:${BASE_TAG}
 COPY --from=build --link /var/lib/openstack /var/lib/openstack
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ovmf \
+    && apt-get install -y --no-install-recommends ovmf qemu-block-extra \
     && rm -rf /var/lib/apt/lists/*
