@@ -12,7 +12,6 @@ RUN uv pip install -c /upper-constraints.txt jaeger-client
 ARG OPENSTACK_RELEASE
 COPY patches/${OPENSTACK_RELEASE}/nova-ovmf-mmio.patch /tmp/nova-ovmf-mmio.patch
 RUN cd /var/lib/openstack/lib/python3.12/site-packages \
-    && git apply --check /tmp/nova-ovmf-mmio.patch \
     && git apply /tmp/nova-ovmf-mmio.patch
 
 FROM quay.io/airshipit/nova:${BASE_TAG}

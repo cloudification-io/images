@@ -27,9 +27,14 @@ env:
   REGISTRY: ghcr.io
   IMAGE_PREFIX: ghcr.io/cloudification-io
 
+concurrency:
+  group: build-images-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   setup:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       matrix: ${{ steps.matrix.outputs.result }}
       has_images: ${{ steps.matrix.outputs.has_images }}
@@ -101,7 +106,7 @@ jobs:
 
           # Filter by changed paths on push events
           if [ "$EVENT" = "push" ]; then
-            CHANGED='${{ steps.changes.outputs.files }}'
+            CHANGED="$CHANGED_FILES"
 
             # If images.yaml itself changed, rebuild everything
             if echo "$CHANGED" | jq -e 'any(. == "images.yaml")' > /dev/null 2>&1; then
@@ -136,6 +141,7 @@ jobs:
     needs: setup
     if: needs.setup.outputs.has_images == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     permissions:
       contents: read
       packages: write

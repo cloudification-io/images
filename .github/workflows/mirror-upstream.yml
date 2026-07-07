@@ -21,14 +21,22 @@ on:
 env:
   IMAGE_PREFIX: ghcr.io/cloudification-io
 
+concurrency:
+  group: mirror-upstream-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   mirror:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
       contents: read
       packages: write
     steps:
       - uses: actions/checkout@v6
+
+      - name: Install skopeo
+        run: sudo apt-get update && sudo apt-get install -y skopeo
 
       - name: Log in to ghcr.io
         env:

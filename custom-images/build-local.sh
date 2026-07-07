@@ -1,5 +1,10 @@
 #!/bin/bash
-set -e
+set -euo pipefail
+
+if ! command -v yq &>/dev/null; then
+    echo "ERROR: yq is not installed (brew install yq)" >&2
+    exit 1
+fi
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 OPENSTACK_RELEASE="${OPENSTACK_RELEASE:-2025.1}"
@@ -20,7 +25,7 @@ if [[ $(uname -m) == 'arm64' ]]; then
     DOCKER_BUILD="docker buildx build --platform linux/amd64"
 fi
 
-# Read image definitions from shared config (requires yq: brew install yq)
+# Read image definitions from shared config
 IMAGE_COUNT=$(yq '.images | length' "$SCRIPT_DIR/images.yaml")
 BUILT_IMAGES=()
 
@@ -57,4 +62,6 @@ done
 
 echo ""
 echo "Built images:"
-printf '%s\n' "${BUILT_IMAGES[@]}"
+if [[ ${#BUILT_IMAGES[@]} -gt 0 ]]; then
+    printf '%s\n' "${BUILT_IMAGES[@]}"
+fi

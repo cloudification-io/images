@@ -12,7 +12,7 @@ Executing this commands will build and push all Openstack images
 
 ```bash
 export OPENSTACK_RELEASE="2025.1"
-export TOOLS_VERSION="0.6" # increment this
+export TOOLS_VERSION="1.0" # increment this
 
 bash custom-images/build-local.sh
 ```
@@ -45,19 +45,19 @@ skopeo login docker.io
 ### Mirror all images
 
 ```bash
-bash custom-images/mirror-to-dockerhub.sh
+bash mirror-to-dockerhub.sh
 ```
 
 Preview what would be mirrored without actually copying:
 
 ```bash
-DRY_RUN=true bash custom-images/mirror-to-dockerhub.sh
+DRY_RUN=true bash mirror-to-dockerhub.sh
 ```
 
 ### Mirror specific images
 
 ```bash
-IMAGES=nova,horizon bash custom-images/mirror-to-dockerhub.sh
+IMAGES=nova,horizon bash mirror-to-dockerhub.sh
 ```
 
 ### Mirror modes
@@ -65,19 +65,19 @@ IMAGES=nova,horizon bash custom-images/mirror-to-dockerhub.sh
 By default all tags are mirrored (`MIRROR_MODE=all`). To mirror only clean (non-timestamped) tags:
 
 ```bash
-MIRROR_MODE=clean bash custom-images/mirror-to-dockerhub.sh
+MIRROR_MODE=clean bash mirror-to-dockerhub.sh
 ```
 
 Or only the latest timestamped tag per image:
 
 ```bash
-MIRROR_MODE=latest-timestamped bash custom-images/mirror-to-dockerhub.sh
+MIRROR_MODE=latest-timestamped bash mirror-to-dockerhub.sh
 ```
 
-### Including coredns
+### Excluding images
 
-`coredns-k8s-gateway` is excluded by default. To include it:
+All discovered packages are mirrored by default. To exclude some:
 
 ```bash
-EXCLUDE_IMAGES="" bash custom-images/mirror-to-dockerhub.sh
+EXCLUDE_IMAGES=coredns-k8s-gateway bash mirror-to-dockerhub.sh
 ```

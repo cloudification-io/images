@@ -6,11 +6,11 @@ set -euo pipefail
 # Prerequisites: gh auth login, skopeo login ghcr.io, skopeo login docker.io
 #
 # Usage:
-#   ./mirror-to-dockerhub.sh                              # mirror all tags (except coredns)
+#   ./mirror-to-dockerhub.sh                              # mirror all tags of all packages
 #   DRY_RUN=true ./mirror-to-dockerhub.sh                 # preview
 #   IMAGES=nova,horizon ./mirror-to-dockerhub.sh           # specific images only
 #   MIRROR_MODE=clean ./mirror-to-dockerhub.sh             # skip timestamped tags
-#   EXCLUDE_IMAGES="" ./mirror-to-dockerhub.sh             # include coredns too
+#   EXCLUDE_IMAGES=coredns-k8s-gateway ./mirror-to-dockerhub.sh  # skip some images
 #   FORCE=true ./mirror-to-dockerhub.sh                    # skip digest check, copy everything
 
 SOURCE_REGISTRY="${SOURCE_REGISTRY:-ghcr.io/cloudification-io}"
