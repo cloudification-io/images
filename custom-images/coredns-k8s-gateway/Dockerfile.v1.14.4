@@ -1,7 +1,7 @@
-FROM docker.io/library/golang:1.26.1 AS build
-ARG COREDNS_VERSION=v1.14.3
+FROM docker.io/library/golang:1.26.4 AS build
+ARG COREDNS_VERSION=v1.14.4
 ARG ALTERNATE_VERSION=v0.2.12
-ARG K8S_GATEWAY_VERSION=v1.7.0
+ARG K8S_GATEWAY_VERSION=v1.8.2
 
 WORKDIR /go/src/coredns
 

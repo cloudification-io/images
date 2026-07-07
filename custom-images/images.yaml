@@ -141,8 +141,8 @@ images:
       - coredns-k8s-gateway/
 
   - name: coredns-k8s-gateway
-    dockerfile: coredns-k8s-gateway/Dockerfile.v1.14.3
+    dockerfile: coredns-k8s-gateway/Dockerfile.v1.14.4
     context: coredns-k8s-gateway
-    tag_template: "1.14.3"
+    tag_template: "1.14.4"
     paths:
       - coredns-k8s-gateway/
