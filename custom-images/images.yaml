@@ -68,6 +68,7 @@ images:
     dockerfile: cloudkitty/Dockerfile
     context: cloudkitty
     tag_template: "{release}-ubuntu_noble"
+    release: "2026.1"
     paths:
       - cloudkitty/
 

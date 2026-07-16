@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-ARG OPENSTACK_RELEASE=2025.1
+ARG OPENSTACK_RELEASE=2026.1
 ARG BASE_TAG=${OPENSTACK_RELEASE}-ubuntu_noble
 
 FROM quay.io/airshipit/cloudkitty:${BASE_TAG} AS upstream
