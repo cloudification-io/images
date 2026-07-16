@@ -191,6 +191,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             OPENSTACK_RELEASE=${{ matrix.effective_release }}
+            CACHE_BUST=${{ github.run_id }}-${{ github.run_attempt }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
