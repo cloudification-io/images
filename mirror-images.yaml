@@ -35,19 +35,19 @@ images:
     source: quay.io/openstack.kolla/ceilometer-central
     suffix_tag: true
     tags:
-      - tag: 2025.1-ubuntu-noble
+      - tag: 2026.1-ubuntu-noble
 
   - name: ceilometer-compute
     source: quay.io/openstack.kolla/ceilometer-compute
     suffix_tag: true
     tags:
-      - tag: 2025.1-ubuntu-noble
+      - tag: 2026.1-ubuntu-noble
 
   - name: ceilometer-notification
     source: quay.io/openstack.kolla/ceilometer-notification
     suffix_tag: true
     tags:
-      - tag: 2025.1-ubuntu-noble
+      - tag: 2026.1-ubuntu-noble
 
 # NOTE: we build custom image with uwsgi
 # See custom-images/gnocchi-api
