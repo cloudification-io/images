@@ -200,6 +200,21 @@ jobs:
         run: |
           echo "Digest: ${{ steps.build.outputs.digest }}"
 
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@v1
+        with:
+          image-ref: ${{ env.IMAGE_PREFIX }}/${{ matrix.name }}@${{ steps.build.outputs.digest }}
+          format: template
+          template: "@.github/trivy/html.tpl"
+          output: trivy-report-${{ matrix.name }}.html
+          scanners: vuln
+
+      - name: Upload Trivy report
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-report-${{ matrix.name }}
+          path: trivy-report-${{ matrix.name }}.html
+
       - name: Add to job summary
         env:
           IMAGE_NAME: ${{ matrix.name }}
