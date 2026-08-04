@@ -196,10 +196,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Show image digest
-        run: |
-          echo "Digest: ${{ steps.build.outputs.digest }}"
-
       - name: Scan image with Trivy
         uses: aquasecurity/trivy-action@v1
         with:
