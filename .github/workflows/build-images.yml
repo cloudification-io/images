@@ -181,6 +181,7 @@ jobs:
             type=raw,value=${{ matrix.tag_prefix }}
 
       - name: Build and push
+        id: build
         uses: docker/build-push-action@v7
         with:
           context: ${{ matrix.context }}
@@ -194,6 +195,10 @@ jobs:
             CACHE_BUST=${{ github.run_id }}-${{ github.run_attempt }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Show image digest
+        run: |
+          echo "Digest: ${{ steps.build.outputs.digest }}"
 
       - name: Add to job summary
         env:
