@@ -196,20 +196,32 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Prepare Trivy report directory
+        run: mkdir -p "trivy-reports/${{ matrix.name }}"
+
       - name: Scan image with Trivy
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ env.IMAGE_PREFIX }}/${{ matrix.name }}@${{ steps.build.outputs.digest }}
           format: template
           template: "@.github/trivy/html.tpl"
-          output: trivy-report-${{ matrix.name }}.html
+          output: trivy-reports/${{ matrix.name }}/index.html
           scanners: vuln
+
+      - name: Generate Trivy report metadata
+        run: |
+          python3 .github/scripts/create_trivy_metadata.py \
+            --report-dir "trivy-reports/${{ matrix.name }}" \
+            --image "${{ matrix.name }}" \
+            --tag "${{ steps.tag.outputs.full_tag }}" \
+            --digest "${{ steps.build.outputs.digest }}" \
+            --image-reference "${{ env.IMAGE_PREFIX }}/${{ matrix.name }}@${{ steps.build.outputs.digest }}"
 
       - name: Upload Trivy report
         uses: actions/upload-artifact@v4
         with:
           name: trivy-report-${{ matrix.name }}
-          path: trivy-report-${{ matrix.name }}.html
+          path: trivy-reports/${{ matrix.name }}
 
       - name: Add to job summary
         env:
@@ -220,3 +232,25 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           echo "${IMAGE_PREFIX}/${IMAGE_NAME}:${FULL_TAG}" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+  publish-reports:
+    needs: [setup, build]
+    if: needs.setup.outputs.has_images == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Download Trivy reports
+        uses: actions/download-artifact@v7
+        with:
+          pattern: trivy-report-*
+          path: trivy-reports
+
+
