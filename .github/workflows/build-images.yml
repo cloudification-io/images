@@ -253,4 +253,40 @@ jobs:
           pattern: trivy-report-*
           path: trivy-reports
 
+      - name: Checkout GitHub Pages branch
+        uses: actions/checkout@v6
+        with:
+          ref: gh-pages
+          path: site
+          fetch-depth: 1
 
+      - name: Prepare GitHub Pages content
+        run: |
+          python3 .github/scripts/publish-trivy-reports.py \
+            --input-dir trivy-reports \
+            --site-dir site \
+            --keep 10
+
+      - name: Configure Git
+        working-directory: site
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Show Git status
+        working-directory: site
+        run: |
+          git status
+
+      - name: Commit GitHub Pages changes
+        working-directory: site
+        run: |
+          git add --all
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Update Trivy reports"
+          git push origin HEAD:gh-pages
