@@ -4,6 +4,7 @@ import argparse
 import json
 import shutil
 from dataclasses import dataclass
+from html import escape
 from pathlib import Path
 
 
@@ -50,6 +51,11 @@ def load_metadata(metadata_file: Path) -> ReportMetadata:
         raise ValueError(
             f"Invalid JSON in metadata file {metadata_file}: {error}"
         ) from error
+    if not isinstance(raw_metadata, dict):
+        raise ValueError(
+            f"Metadata file {metadata_file} must contain a JSON object"
+        )
+
 
     required_fields = {
         "image",
@@ -168,6 +174,111 @@ def cleanup_old_reports(
             print(f"Removed old report: {directory}")
 
 
+def generate_image_indexes(site_directory: Path) -> None:
+    reports_directory = site_directory / "reports"
+
+    if not reports_directory.exists():
+        return
+
+    for image_directory in sorted(reports_directory.iterdir()):
+        if not image_directory.is_dir():
+            continue
+
+        report_entries: list[ReportMetadata] = []
+
+        for report_directory in image_directory.iterdir():
+            if not report_directory.is_dir():
+                continue
+
+            report_entries.append(
+                load_report_metadata(report_directory)
+            )
+
+        report_entries.sort(
+            key=lambda report: report.generated_at,
+            reverse=True,
+        )
+
+        report_links = "\n".join(
+            (
+                "        <li>"
+                f'<a href="{escape(report.tag)}/">'
+                f"{escape(report.tag)}"
+                "</a>"
+                f" — {escape(report.generated_at)}"
+                "</li>"
+            )
+            for report in report_entries
+        )
+
+        page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trivy reports for {escape(image_directory.name)}</title>
+</head>
+<body>
+    <h1>Trivy reports for {escape(image_directory.name)}</h1>
+    <p><a href="../../">Back to all images</a></p>
+    <ul>
+{report_links}
+    </ul>
+</body>
+</html>
+"""
+
+        index_file = image_directory / "index.html"
+        index_file.write_text(page, encoding="utf-8")
+
+        print(f"Generated image index: {index_file}")
+
+
+def generate_root_index(site_directory: Path) -> None:
+    reports_directory = site_directory / "reports"
+
+    if not reports_directory.exists():
+        return
+
+    image_directories = sorted(
+        directory
+        for directory in reports_directory.iterdir()
+        if directory.is_dir()
+    )
+
+    image_links = "\n".join(
+        (
+            "        <li>"
+            f'<a href="reports/{escape(image_directory.name)}/">'
+            f"{escape(image_directory.name)}"
+            "</a>"
+            "</li>"
+        )
+        for image_directory in image_directories
+    )
+
+    page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trivy vulnerability reports</title>
+</head>
+<body>
+    <h1>Trivy vulnerability reports</h1>
+    <ul>
+{image_links}
+    </ul>
+</body>
+</html>
+"""
+
+    index_file = site_directory / "index.html"
+    index_file.write_text(page, encoding="utf-8")
+
+    print(f"Generated root index: {index_file}")
+
+
 def main() -> None:
     args = parse_arguments()
 
@@ -200,7 +311,15 @@ def main() -> None:
     cleanup_old_reports(
         site_directory=args.site_dir,
         keep=args.keep,
-)
+    )
+
+    generate_image_indexes(
+        site_directory=args.site_dir,
+    )
+
+    generate_root_index(
+        site_directory=args.site_dir,
+    )
 
 
 if __name__ == "__main__":
