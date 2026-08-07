@@ -1,0 +1,8 @@
+{
+  "image": "heat",
+  "tag": "2025.1-ubuntu_noble-20260807103332",
+  "digest": "sha256:351524a8b715287e121a6fa1c0de4439c092e546bd3c6d06637b1a7beea26689",
+  "image_reference": "ghcr.io/cloudification-io/heat@sha256:351524a8b715287e121a6fa1c0de4439c092e546bd3c6d06637b1a7beea26689",
+  "generated_at": "2026-08-07T10:35:21.363045+00:00",
+  "report": "index.html"
+}
