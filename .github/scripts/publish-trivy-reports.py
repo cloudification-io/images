@@ -4,6 +4,7 @@ import argparse
 import json
 import shutil
 from dataclasses import dataclass
+from datetime import datetime
 from html import escape
 from pathlib import Path
 
@@ -37,6 +38,9 @@ body {
     border: 1px solid #d8dee4;
     border-radius: 6px;
     padding: 12px 16px;
+
+    width: fit-content;
+    min-width: 500px;
 }
 
 .card + .card {
@@ -252,7 +256,9 @@ def generate_image_indexes(site_directory: Path) -> None:
                 f'<a href="{escape(report.tag)}/">'
                 f"{escape(report.tag)}"
                 "</a>"
-                f'<span class="report-time">{escape(report.generated_at)}</span>'
+                f'<span class="report-time">'
+                f'{datetime.fromisoformat(report.generated_at).strftime("%b %d, %Y • %H:%M UTC")}'
+                "</span>"
                 "</li>"
             )
             for report in report_entries
