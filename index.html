@@ -51,20 +51,30 @@ body {
     display: inline-block;
     margin-bottom: 20px;
 }
+
+.critical-badge {
+    margin-left: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #cf222e;
+    color: white;
+    font-size: 80%;
+    font-weight: 600;
+}
 </style>
     <title>Trivy vulnerability reports</title>
 </head>
 <body>
     <h1>Trivy vulnerability reports</h1>
     <ul class="card-list">
-    <li class="card"><a href="reports/barbican/">barbican</a></li>
+    <li class="card"><a href="reports/barbican/">barbican</a><span class="critical-badge">Critical: 1</span></li>
 <li class="card"><a href="reports/cinder/">cinder</a></li>
 <li class="card"><a href="reports/cloudkitty/">cloudkitty</a></li>
-<li class="card"><a href="reports/coredns-k8s-gateway/">coredns-k8s-gateway</a></li>
-<li class="card"><a href="reports/coredns-k8s-gateway-legacy/">coredns-k8s-gateway-legacy</a></li>
+<li class="card"><a href="reports/coredns-k8s-gateway/">coredns-k8s-gateway</a><span class="critical-badge">Critical: 9</span></li>
+<li class="card"><a href="reports/coredns-k8s-gateway-legacy/">coredns-k8s-gateway-legacy</a><span class="critical-badge">Critical: 13</span></li>
 <li class="card"><a href="reports/designate/">designate</a></li>
 <li class="card"><a href="reports/glance/">glance</a></li>
-<li class="card"><a href="reports/gnocchi-api/">gnocchi-api</a></li>
+<li class="card"><a href="reports/gnocchi-api/">gnocchi-api</a><span class="critical-badge">Critical: 1</span></li>
 <li class="card"><a href="reports/heat/">heat</a></li>
 <li class="card"><a href="reports/horizon/">horizon</a></li>
 <li class="card"><a href="reports/keystone/">keystone</a></li>
@@ -74,7 +84,7 @@ body {
 <li class="card"><a href="reports/neutron/">neutron</a></li>
 <li class="card"><a href="reports/nova/">nova</a></li>
 <li class="card"><a href="reports/octavia/">octavia</a></li>
-<li class="card"><a href="reports/openstack-tools/">openstack-tools</a></li>
+<li class="card"><a href="reports/openstack-tools/">openstack-tools</a><span class="critical-badge">Critical: 42</span></li>
 <li class="card"><a href="reports/openvswitch/">openvswitch</a></li>
 <li class="card"><a href="reports/placement/">placement</a></li>
     </ul>

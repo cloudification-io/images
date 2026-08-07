@@ -1,0 +1,9 @@
+{
+  "image": "neutron",
+  "tag": "2025.1-ubuntu_noble-20260807140553",
+  "digest": "sha256:1340f086e6db7fa736c5efd93e352782b9d9573148fa8b4b78f07cb807f73202",
+  "image_reference": "ghcr.io/cloudification-io/neutron@sha256:1340f086e6db7fa736c5efd93e352782b9d9573148fa8b4b78f07cb807f73202",
+  "generated_at": "2026-08-07T14:07:01.857943+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}
