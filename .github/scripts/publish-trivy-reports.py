@@ -18,6 +18,7 @@ class ReportMetadata:
     generated_at: str
     report: str
     source_directory: Path
+    critical_vulnerabilities: int
 
 
 PAGE_STYLE = """
@@ -68,6 +69,16 @@ body {
     display: inline-block;
     margin-bottom: 20px;
 }
+
+.critical-badge {
+    margin-left: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #cf222e;
+    color: white;
+    font-size: 80%;
+    font-weight: 600;
+}
 """
 
 
@@ -115,6 +126,7 @@ def load_metadata(metadata_file: Path) -> ReportMetadata:
         "image_reference",
         "generated_at",
         "report",
+        "critical_vulnerabilities",
     }
 
     missing_fields = required_fields - raw_metadata.keys()
@@ -138,6 +150,7 @@ def load_metadata(metadata_file: Path) -> ReportMetadata:
         generated_at=raw_metadata["generated_at"],
         report=raw_metadata["report"],
         source_directory=metadata_file.parent,
+        critical_vulnerabilities=raw_metadata["critical_vulnerabilities"],
     )
 
 
@@ -212,7 +225,8 @@ def cleanup_old_reports(
                 for directory in image_directory.iterdir()
                 if directory.is_dir()
             ),
-            key=lambda directory: load_report_metadata(directory).generated_at,
+            key=lambda directory: datetime.fromisoformat(
+              load_report_metadata(directory).generated_at),
         )
 
         if len(report_directories) <= keep:
@@ -223,6 +237,24 @@ def cleanup_old_reports(
         for directory in directories_to_remove:
             shutil.rmtree(directory)
             print(f"Removed old report: {directory}")
+
+
+def get_latest_report(image_directory: Path) -> ReportMetadata:
+    report_entries = [
+        load_report_metadata(report_directory)
+        for report_directory in image_directory.iterdir()
+        if report_directory.is_dir()
+    ]
+
+    if not report_entries:
+        raise ValueError(
+            f"No reports found for image: {image_directory.name}"
+        )
+
+    return max(
+        report_entries,
+        key=lambda report: datetime.fromisoformat(report.generated_at),
+    )
 
 
 def generate_image_indexes(site_directory: Path) -> None:
@@ -246,7 +278,7 @@ def generate_image_indexes(site_directory: Path) -> None:
             )
 
         report_entries.sort(
-            key=lambda report: report.generated_at,
+            key=lambda report: datetime.fromisoformat(report.generated_at),
             reverse=True,
         )
 
@@ -302,16 +334,29 @@ def generate_root_index(site_directory: Path) -> None:
         if directory.is_dir()
     )
 
-    image_links = "\n".join(
-        (
+    image_links_entries: list[str] = []
+
+    for image_directory in image_directories:
+        latest_report = get_latest_report(image_directory)
+
+        critical_badge = ""
+        if latest_report.critical_vulnerabilities > 0:
+            critical_badge = (
+                '<span class="critical-badge">'
+                f"Critical: {latest_report.critical_vulnerabilities}"
+                "</span>"
+            )
+
+        image_links_entries.append(
             '<li class="card">'
             f'<a href="reports/{escape(image_directory.name)}/">'
             f"{escape(image_directory.name)}"
             "</a>"
+            f"{critical_badge}"
             "</li>"
         )
-        for image_directory in image_directories
-    )
+
+    image_links = "\n".join(image_links_entries)
 
     page = f"""<!DOCTYPE html>
 <html lang="en">

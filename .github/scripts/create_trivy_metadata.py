@@ -49,6 +49,7 @@ def main() -> None:
 
     report_dir: Path = args.report_dir
     report_file = report_dir / "index.html"
+    trivy_json_file = report_dir / "report.json"
     metadata_file = report_dir / "metadata.json"
 
     if not report_dir.is_dir():
@@ -57,19 +58,32 @@ def main() -> None:
     if not report_file.is_file():
         raise SystemExit(f"Trivy report does not exist: {report_file}")
 
+    if not trivy_json_file.is_file():
+        raise SystemExit(f"Trivy JSON report does not exist: {trivy_json_file}")
+
     if not args.digest.startswith("sha256:"):
         raise SystemExit(
             f"Unexpected image digest format: {args.digest}. "
             "Expected a value beginning with 'sha256:'."
         )
 
-    metadata: dict[str, str] = {
+    trivy_report = json.loads(trivy_json_file.read_text(encoding="utf-8"))
+
+    critical_count = sum(
+        1
+        for result in trivy_report.get("Results", [])
+        for vulnerability in result.get("Vulnerabilities") or []
+        if vulnerability.get("Severity") == "CRITICAL"
+    )
+
+    metadata: dict[str, str | int] = {
         "image": args.image,
         "tag": args.tag,
         "digest": args.digest,
         "image_reference": args.image_reference,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "report": report_file.name,
+        "critical_vulnerabilities": critical_count,
     }
 
     metadata_file.write_text(
