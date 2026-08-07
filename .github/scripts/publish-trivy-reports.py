@@ -37,10 +37,10 @@ body {
     background: white;
     border: 1px solid #d8dee4;
     border-radius: 6px;
-    padding: 12px 16px;
+    padding: 14px 18px;
 
     width: fit-content;
-    min-width: 500px;
+    min-width: 330px;
 }
 
 .card + .card {
