@@ -19,6 +19,54 @@ class ReportMetadata:
     source_directory: Path
 
 
+PAGE_STYLE = """
+body {
+    margin: 0;
+    padding: 24px;
+    background: #f6f8fa;
+}
+
+.card-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.card {
+    background: white;
+    border: 1px solid #d8dee4;
+    border-radius: 6px;
+    padding: 12px 16px;
+}
+
+.card + .card {
+    margin-top: 10px;
+}
+
+.card a {
+    text-decoration: none;
+    color: #0969da;
+    font-weight: 600;
+}
+
+.card a:hover {
+    text-decoration: underline;
+}
+
+.report-time {
+    display: block;
+    margin-top: 4px;
+    color: #656d76;
+    font-size: 90%;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+}
+"""
+
+
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Prepare Trivy HTML reports for GitHub Pages."
@@ -55,7 +103,6 @@ def load_metadata(metadata_file: Path) -> ReportMetadata:
         raise ValueError(
             f"Metadata file {metadata_file} must contain a JSON object"
         )
-
 
     required_fields = {
         "image",
@@ -201,11 +248,11 @@ def generate_image_indexes(site_directory: Path) -> None:
 
         report_links = "\n".join(
             (
-                "        <li>"
+                '        <li class="card">'
                 f'<a href="{escape(report.tag)}/">'
                 f"{escape(report.tag)}"
                 "</a>"
-                f" — {escape(report.generated_at)}"
+                f'<span class="report-time">{escape(report.generated_at)}</span>'
                 "</li>"
             )
             for report in report_entries
@@ -216,13 +263,16 @@ def generate_image_indexes(site_directory: Path) -> None:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>{PAGE_STYLE}</style>
     <title>Trivy reports for {escape(image_directory.name)}</title>
 </head>
 <body>
     <h1>Trivy reports for {escape(image_directory.name)}</h1>
-    <p><a href="../../">Back to all images</a></p>
-    <ul>
-{report_links}
+      <a class="back-link" href="../../">
+          ← Back to all images
+      </a>
+    <ul class="card-list">
+    {report_links}
     </ul>
 </body>
 </html>
@@ -248,7 +298,7 @@ def generate_root_index(site_directory: Path) -> None:
 
     image_links = "\n".join(
         (
-            "        <li>"
+            '<li class="card">'
             f'<a href="reports/{escape(image_directory.name)}/">'
             f"{escape(image_directory.name)}"
             "</a>"
@@ -262,12 +312,13 @@ def generate_root_index(site_directory: Path) -> None:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>{PAGE_STYLE}</style>
     <title>Trivy vulnerability reports</title>
 </head>
 <body>
     <h1>Trivy vulnerability reports</h1>
-    <ul>
-{image_links}
+    <ul class="card-list">
+    {image_links}
     </ul>
 </body>
 </html>
