@@ -203,10 +203,19 @@ jobs:
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ env.IMAGE_PREFIX }}/${{ matrix.name }}@${{ steps.build.outputs.digest }}
-          format: template
-          template: "@.github/trivy/html.tpl"
-          output: trivy-reports/${{ matrix.name }}/index.html
+          format: json
+          output: trivy-reports/${{ matrix.name }}/report.json
           scanners: vuln
+
+      - name: Install scan2html plugin
+        run: trivy plugin install scan2html
+
+      - name: Generate interactive Trivy report
+        run: |
+          trivy scan2html generate \
+            --scan2html-flags \
+            --output "trivy-reports/${{ matrix.name }}/index.html" \
+            --from "trivy-reports/${{ matrix.name }}/report.json"
 
       - name: Generate Trivy report metadata
         run: |
