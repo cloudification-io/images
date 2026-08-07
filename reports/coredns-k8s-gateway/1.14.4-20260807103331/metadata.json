@@ -1,8 +1,0 @@
-{
-  "image": "coredns-k8s-gateway",
-  "tag": "1.14.4-20260807103331",
-  "digest": "sha256:b3d4e8b1b9917431f40bb4b117efdf0d876337f80e25a252447911e98655a322",
-  "image_reference": "ghcr.io/cloudification-io/coredns-k8s-gateway@sha256:b3d4e8b1b9917431f40bb4b117efdf0d876337f80e25a252447911e98655a322",
-  "generated_at": "2026-08-07T10:37:21.697456+00:00",
-  "report": "index.html"
-}

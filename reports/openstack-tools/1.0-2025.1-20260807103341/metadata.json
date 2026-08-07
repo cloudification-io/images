@@ -1,8 +1,0 @@
-{
-  "image": "openstack-tools",
-  "tag": "1.0-2025.1-20260807103341",
-  "digest": "sha256:eb49a9946414607e4efb305602c42c8ea69bcf79d39eac24af575ea66cd8cc48",
-  "image_reference": "ghcr.io/cloudification-io/openstack-tools@sha256:eb49a9946414607e4efb305602c42c8ea69bcf79d39eac24af575ea66cd8cc48",
-  "generated_at": "2026-08-07T10:36:35.075372+00:00",
-  "report": "index.html"
-}

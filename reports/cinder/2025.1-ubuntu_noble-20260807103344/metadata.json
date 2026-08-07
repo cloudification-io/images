@@ -1,8 +1,0 @@
-{
-  "image": "cinder",
-  "tag": "2025.1-ubuntu_noble-20260807103344",
-  "digest": "sha256:2a35f502d02904c0da0dcfd82624acd49c94b22e808627570937ee79b5688974",
-  "image_reference": "ghcr.io/cloudification-io/cinder@sha256:2a35f502d02904c0da0dcfd82624acd49c94b22e808627570937ee79b5688974",
-  "generated_at": "2026-08-07T10:35:21.400296+00:00",
-  "report": "index.html"
-}
