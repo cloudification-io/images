@@ -3,12 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+body {
+    margin: 0;
+    padding: 24px;
+    background: #f6f8fa;
+}
+
+.card-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.card {
+    background: white;
+    border: 1px solid #d8dee4;
+    border-radius: 6px;
+    padding: 12px 16px;
+}
+
+.card + .card {
+    margin-top: 10px;
+}
+
+.card a {
+    text-decoration: none;
+    color: #0969da;
+    font-weight: 600;
+}
+
+.card a:hover {
+    text-decoration: underline;
+}
+
+.report-time {
+    display: block;
+    margin-top: 4px;
+    color: #656d76;
+    font-size: 90%;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+}
+</style>
     <title>Trivy vulnerability reports</title>
 </head>
 <body>
     <h1>Trivy vulnerability reports</h1>
-    <ul>
-        <li><a href="reports/nova/">nova</a></li>
+    <ul class="card-list">
+    <li class="card"><a href="reports/nova/">nova</a></li>
     </ul>
 </body>
 </html>

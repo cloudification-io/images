@@ -3,14 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+body {
+    margin: 0;
+    padding: 24px;
+    background: #f6f8fa;
+}
+
+.card-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.card {
+    background: white;
+    border: 1px solid #d8dee4;
+    border-radius: 6px;
+    padding: 12px 16px;
+}
+
+.card + .card {
+    margin-top: 10px;
+}
+
+.card a {
+    text-decoration: none;
+    color: #0969da;
+    font-weight: 600;
+}
+
+.card a:hover {
+    text-decoration: underline;
+}
+
+.report-time {
+    display: block;
+    margin-top: 4px;
+    color: #656d76;
+    font-size: 90%;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+}
+</style>
     <title>Trivy reports for nova</title>
 </head>
 <body>
     <h1>Trivy reports for nova</h1>
-    <p><a href="../../">Back to all images</a></p>
-    <ul>
-        <li><a href="2025.1-ubuntu_noble-20260807094258/">2025.1-ubuntu_noble-20260807094258</a> — 2026-08-07T09:45:01.216997+00:00</li>
-        <li><a href="2025.1-ubuntu_noble-20260806145205/">2025.1-ubuntu_noble-20260806145205</a> — 2026-08-06T14:52:33.740857+00:00</li>
+      <a class="back-link" href="../../">
+          ← Back to all images
+      </a>
+    <ul class="card-list">
+            <li class="card"><a href="2025.1-ubuntu_noble-20260807102205/">2025.1-ubuntu_noble-20260807102205</a><span class="report-time">2026-08-07T10:22:26.785679+00:00</span></li>
+        <li class="card"><a href="2025.1-ubuntu_noble-20260807094258/">2025.1-ubuntu_noble-20260807094258</a><span class="report-time">2026-08-07T09:45:01.216997+00:00</span></li>
+        <li class="card"><a href="2025.1-ubuntu_noble-20260806145205/">2025.1-ubuntu_noble-20260806145205</a><span class="report-time">2026-08-06T14:52:33.740857+00:00</span></li>
     </ul>
 </body>
 </html>
