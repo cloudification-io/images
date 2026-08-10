@@ -100,6 +100,13 @@ images:
     paths:
       - placement/
 
+  - name: manila
+    dockerfile: manila/Dockerfile
+    context: manila
+    tag_template: "{release}-ubuntu_noble"
+    paths:
+      - manila/
+
   - name: libvirt
     dockerfile: libvirt/Dockerfile
     context: libvirt
