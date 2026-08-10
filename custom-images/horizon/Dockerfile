@@ -9,7 +9,7 @@ ENV PATH=/var/lib/openstack/bin:$PATH
 COPY --from=upstream /var/lib/openstack /var/lib/openstack
 
 ARG OPENSTACK_RELEASE
-ARG HORIZON_REF=stable/${OPENSTACK_RELEASE}-c12n
+ARG HORIZON_REF=stable/${OPENSTACK_RELEASE}
 ARG CLOUDKITTY_DASHBOARD_REF=stable/${OPENSTACK_RELEASE}-c12n
 ARG OCTAVIA_DASHBOARD_REF=stable/${OPENSTACK_RELEASE}
 ARG BARBICAN_UI_REF=main
@@ -21,7 +21,7 @@ RUN echo "Cache bust: ${CACHE_BUST}" \
  && PBR_VERSION=$(sed -n 's/^horizon===//p' /upper-constraints.txt) \
     uv pip install --build-constraint /upper-constraints.txt -c /upper-constraints.txt \
         --reinstall-package horizon \
-        "horizon @ git+https://github.com/cloudification-io/horizon.git@${HORIZON_REF}"
+        "horizon @ git+https://github.com/openstack/horizon.git@${HORIZON_REF}"
 
 RUN uv pip install -c /upper-constraints.txt \
         jaeger-client \
