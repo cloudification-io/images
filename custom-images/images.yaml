@@ -123,6 +123,13 @@ images:
     paths:
       - gnocchi-api/
 
+  - name: gnocchi-metricd
+    dockerfile: gnocchi-metricd/Dockerfile
+    context: gnocchi-metricd
+    tag_template: "{release}-ubuntu-noble"
+    paths:
+      - gnocchi-metricd/
+
   # Standalone builds — different base images and versioning
   - name: openstack-tools
     dockerfile: openstack-tools/Dockerfile
