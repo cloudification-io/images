@@ -63,11 +63,13 @@ images:
     tags:
       - tag: 2025.1-ubuntu-noble
 
-  - name: gnocchi-metricd
-    source: quay.io/openstack.kolla/gnocchi-metricd
-    suffix_tag: true
-    tags:
-      - tag: 2025.1-ubuntu-noble
+# NOTE: we build custom image with pinned numpy
+# See custom-images/gnocchi-metricd
+#  - name: gnocchi-metricd
+#    source: quay.io/openstack.kolla/gnocchi-metricd
+#    suffix_tag: true
+#    tags:
+#      - tag: 2025.1-ubuntu-noble
 
   - name: gnocchi-statsd
     source: quay.io/openstack.kolla/gnocchi-statsd
