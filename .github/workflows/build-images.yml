@@ -257,7 +257,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download Trivy reports
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: trivy-report-*
           path: trivy-reports
