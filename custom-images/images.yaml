@@ -127,6 +127,7 @@ images:
     dockerfile: gnocchi-api/Dockerfile
     context: gnocchi-api
     tag_template: "{release}-ubuntu-noble"
+    release: "2026.1"
     paths:
       - gnocchi-api/
 
@@ -134,6 +135,7 @@ images:
     dockerfile: gnocchi-metricd/Dockerfile
     context: gnocchi-metricd
     tag_template: "{release}-ubuntu-noble"
+    release: "2026.1"
     paths:
       - gnocchi-metricd/
 
