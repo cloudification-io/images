@@ -1,0 +1,9 @@
+{
+  "image": "coredns-k8s-gateway",
+  "tag": "1.14.4-20260818073527",
+  "digest": "sha256:5d240a75a2c93fa3f9eaabac9427c788d710e786b5de39d9055261400d548b05",
+  "image_reference": "ghcr.io/cloudification-io/coredns-k8s-gateway@sha256:5d240a75a2c93fa3f9eaabac9427c788d710e786b5de39d9055261400d548b05",
+  "generated_at": "2026-08-18T07:40:27.751117+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 9
+}

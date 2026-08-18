@@ -1,0 +1,9 @@
+{
+  "image": "barbican",
+  "tag": "2025.1-ubuntu_noble-20260818073530",
+  "digest": "sha256:f2790ad2d7b2e26fde039640cb5fdeb5db06457212ee47053b8718108e70fb15",
+  "image_reference": "ghcr.io/cloudification-io/barbican@sha256:f2790ad2d7b2e26fde039640cb5fdeb5db06457212ee47053b8718108e70fb15",
+  "generated_at": "2026-08-18T07:36:40.443943+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}
