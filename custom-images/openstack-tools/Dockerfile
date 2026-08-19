@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim
+FROM ubuntu:24.04
 
 ENV LC_ALL=C.UTF-8
 ENV OS_PLACEMENT_API_VERSION=1.39
