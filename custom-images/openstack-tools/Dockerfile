@@ -14,10 +14,10 @@ COPY config/ /opt/openstack-tools
 
 RUN echo HISTFILE="/var/bash/.bash_history" >> /etc/profile && \
     mkdir -p /var/bash
-RUN apt-get update -y && apt-get install -y \
+RUN apt-get update -y && apt-get install -y --no-install-recommends \
         bash-completion fzf curl mtr-tiny wget iproute2 vim-nox nano vim oping \
         pciutils iputils-ping util-linux bat dnsutils fping net-tools netcat-traditional \
-        openssh-client python3-pip apt-transport-https ca-certificates jq git
+        openssh-client python3-pip apt-transport-https ca-certificates jq git gpg
 RUN curl -fsSL https://pkgs.k8s.io/core:/stable:/$kubectl_version/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg && \
     echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/$kubectl_version/deb/ /" | tee /etc/apt/sources.list.d/kubernetes.list && \
     apt-get update && \
