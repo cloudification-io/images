@@ -146,20 +146,3 @@ images:
     tag_template: "{tools_version}-{release}"
     paths:
       - openstack-tools/
-
-  # Legacy v1.11.1 build (old ori-edge plugin import path) — renamed so name-based
-  # filters and CI matrix rows can distinguish it from the current build below.
-  # Candidate for removal once no deployment consumes the 1.11.1 tag.
-  - name: coredns-k8s-gateway-legacy
-    dockerfile: coredns-k8s-gateway/Dockerfile.v1.11.1
-    context: coredns-k8s-gateway
-    tag_template: "1.11.1"
-    paths:
-      - coredns-k8s-gateway/
-
-  - name: coredns-k8s-gateway
-    dockerfile: coredns-k8s-gateway/Dockerfile.v1.14.4
-    context: coredns-k8s-gateway
-    tag_template: "1.14.4"
-    paths:
-      - coredns-k8s-gateway/
