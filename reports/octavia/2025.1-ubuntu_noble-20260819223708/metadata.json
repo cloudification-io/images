@@ -1,0 +1,9 @@
+{
+  "image": "octavia",
+  "tag": "2025.1-ubuntu_noble-20260819223708",
+  "digest": "sha256:001c65092a65a9c06aa29f42a21661eb1dbd9a29e561522c9dee72308f46b9fc",
+  "image_reference": "ghcr.io/cloudification-io/octavia@sha256:001c65092a65a9c06aa29f42a21661eb1dbd9a29e561522c9dee72308f46b9fc",
+  "generated_at": "2026-08-19T22:38:10.352260+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}

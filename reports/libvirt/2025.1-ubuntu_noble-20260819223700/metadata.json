@@ -1,0 +1,9 @@
+{
+  "image": "libvirt",
+  "tag": "2025.1-ubuntu_noble-20260819223700",
+  "digest": "sha256:d12843a40d17b1807ccd9f7733991ac5db1c1593418ee319a1c2dbdb6922baf6",
+  "image_reference": "ghcr.io/cloudification-io/libvirt@sha256:d12843a40d17b1807ccd9f7733991ac5db1c1593418ee319a1c2dbdb6922baf6",
+  "generated_at": "2026-08-19T22:38:45.437067+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}
