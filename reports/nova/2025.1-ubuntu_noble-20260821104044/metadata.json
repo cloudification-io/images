@@ -1,0 +1,9 @@
+{
+  "image": "nova",
+  "tag": "2025.1-ubuntu_noble-20260821104044",
+  "digest": "sha256:a394a368ee8ee8ea656b6db4a1da19fd43b192e5d5c731d636e247fbc4e30640",
+  "image_reference": "ghcr.io/cloudification-io/nova@sha256:a394a368ee8ee8ea656b6db4a1da19fd43b192e5d5c731d636e247fbc4e30640",
+  "generated_at": "2026-08-21T10:42:10.429944+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}
