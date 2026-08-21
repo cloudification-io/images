@@ -121,12 +121,6 @@ while IFS= read -r package; do
         src="docker://${SOURCE_REGISTRY}/${package}:${tag}"
         dst="docker://${DEST_REGISTRY}/${package}:${tag}"
 
-        if [[ "$DRY_RUN" == "true" ]]; then
-            echo "  [dry-run] $src -> $dst"
-            MIRRORED+=("${DEST_REGISTRY}/${package}:${tag}")
-            continue
-        fi
-
         if [[ "$FORCE" != "true" ]]; then
             dst_digest=$(get_manifest_digest "${DEST_REGISTRY}/${package}:${tag}")
             if [[ -n "$dst_digest" ]]; then
@@ -137,6 +131,12 @@ while IFS= read -r package; do
                     continue
                 fi
             fi
+        fi
+
+        if [[ "$DRY_RUN" == "true" ]]; then
+            echo "  [dry-run] $src -> $dst"
+            MIRRORED+=("${DEST_REGISTRY}/${package}:${tag}")
+            continue
         fi
 
         echo "  $tag"
