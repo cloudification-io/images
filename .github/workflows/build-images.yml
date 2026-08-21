@@ -18,6 +18,10 @@ on:
         required: false
         default: ""
         type: string
+      mirror_dry_run:
+        description: "Run mirror images to Docker Hub in dry-run mode"
+        default: false
+        type: boolean
   push:
     branches: [main]
     paths:
@@ -299,3 +303,44 @@ jobs:
 
           git commit -m "Update Trivy reports"
           git push origin HEAD:gh-pages
+
+  mirror-to-dockerhub:
+    name: Mirror images to Docker Hub
+    needs:
+      - setup 
+      - build
+    if: needs.setup.outputs.has_images == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install skopeo
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y skopeo
+
+      - name: Log in to GHCR
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | \
+            skopeo login ghcr.io \
+              --username "${{ github.actor }}" \
+              --password-stdin
+
+      - name: Log in to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | \
+            skopeo login docker.io \
+              --username "${{ secrets.DOCKERHUB_USERNAME }}" \
+              --password-stdin
+
+      - name: Mirror images to Docker Hub
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ inputs.mirror_dry_run }}
+          IMAGES: ${{ join(fromJson(needs.setup.outputs.matrix).include.*.name, ',') }}
+        run: ./mirror-to-dockerhub.sh
