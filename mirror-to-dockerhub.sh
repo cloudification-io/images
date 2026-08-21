@@ -73,9 +73,13 @@ echo "Mirror mode:  $MIRROR_MODE"
 [[ "$FORCE" == "true" ]] && echo "*** FORCE (skip digest check) ***"
 echo ""
 
-PACKAGES=$(gh api --paginate \
-    "orgs/${GH_ORG}/packages?package_type=container" \
-    --jq '.[].name')
+if [[ -n "$IMAGES" ]]; then
+    PACKAGES=$(echo "$IMAGES" | tr ',' '\n')
+else
+    PACKAGES=$(gh api --paginate \
+        "orgs/${GH_ORG}/packages?package_type=container" \
+        --jq '.[].name')
+fi
 
 MIRRORED=()
 SKIPPED=()
