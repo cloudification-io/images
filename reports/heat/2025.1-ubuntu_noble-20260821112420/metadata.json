@@ -1,0 +1,9 @@
+{
+  "image": "heat",
+  "tag": "2025.1-ubuntu_noble-20260821112420",
+  "digest": "sha256:5d32190208753c440bddc8e16fede55be39ddd012b60521181b18bc838f79387",
+  "image_reference": "ghcr.io/cloudification-io/heat@sha256:5d32190208753c440bddc8e16fede55be39ddd012b60521181b18bc838f79387",
+  "generated_at": "2026-08-21T11:25:19.565449+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}
