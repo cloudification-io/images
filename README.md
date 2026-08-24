@@ -32,7 +32,9 @@ Available image names can be found in [images.yaml](custom-images/images.yaml).
 
 ## Mirroring images to Docker Hub
 
-Mirror images from `ghcr.io/cloudification-io` to `docker.io/cloudification` using [skopeo](https://github.com/containers/skopeo). The script discovers packages dynamically via the GitHub API.
+Mirror images from `ghcr.io/cloudification-io` to `docker.io/cloudification` using [skopeo](https://github.com/containers/skopeo). The script mirrors the images listed in `IMAGES`, or discovers all packages via the GitHub API when `IMAGES` is unset.
+
+In CI, the `mirror-to-dockerhub` job in [build-images.yml](.github/workflows/build-images.yml) runs the script after image builds, using the `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` repository secrets. Only runs on `main` publish; a `workflow_dispatch` from any branch can preview the mirroring with the `mirror_dry_run` input.
 
 ### Prerequisites
 
@@ -48,7 +50,7 @@ skopeo login docker.io
 bash mirror-to-dockerhub.sh
 ```
 
-Preview what would be mirrored without actually copying:
+Preview what would be mirrored without actually copying. The preview compares manifest digests, so it needs the same registry logins as a real run:
 
 ```bash
 DRY_RUN=true bash mirror-to-dockerhub.sh
@@ -68,7 +70,7 @@ By default all tags are mirrored (`MIRROR_MODE=all`). To mirror only clean (non-
 MIRROR_MODE=clean bash mirror-to-dockerhub.sh
 ```
 
-Or only the latest timestamped tag per image:
+Or only the latest timestamped tag per tag prefix:
 
 ```bash
 MIRROR_MODE=latest-timestamped bash mirror-to-dockerhub.sh
