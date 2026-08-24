@@ -28,7 +28,14 @@ is_timestamp_tag() {
 
 get_manifest_digest() {
     local raw
-    raw=$(skopeo inspect --raw "docker://$1" 2>/dev/null) || return 0
+    if ! raw=$(skopeo inspect --raw "docker://$1" 2>&1); then
+        # absent tag/repo -> empty digest; other errors must not read as absent
+        if grep -qiE 'manifest unknown|name unknown|not found|requested access to the resource is denied|authentication required' <<< "$raw"; then
+            return 0
+        fi
+        printf '%s\n' "$raw" >&2
+        return 1
+    fi
     printf '%s' "$raw" | sha256sum | awk '{print $1}'
 }
 
@@ -37,17 +44,28 @@ filter_tags() {
     case "$MIRROR_MODE" in
         clean)
             while IFS= read -r tag; do
-                [[ -n "$tag" ]] && ! is_timestamp_tag "$tag" && echo "$tag"
+                if [[ -n "$tag" ]] && ! is_timestamp_tag "$tag"; then
+                    echo "$tag"
+                fi
             done <<< "$all_tags"
             ;;
         latest-timestamped)
+            # newest per prefix; a package can carry several prefixes
             while IFS= read -r tag; do
-                [[ -n "$tag" ]] && is_timestamp_tag "$tag" && echo "$tag"
-            done <<< "$all_tags" | sort | tail -1
+                if [[ -n "$tag" ]] && is_timestamp_tag "$tag"; then
+                    echo "$tag"
+                fi
+            done <<< "$all_tags" | awk '{
+                prefix = substr($0, 1, length($0) - 15)
+                ts = substr($0, length($0) - 13)
+                if (ts > latest[prefix]) latest[prefix] = ts
+            } END { for (p in latest) print p "-" latest[p] }'
             ;;
         all)
             while IFS= read -r tag; do
-                [[ -n "$tag" ]] && echo "$tag"
+                if [[ -n "$tag" ]]; then
+                    echo "$tag"
+                fi
             done <<< "$all_tags"
             ;;
         *)
@@ -73,9 +91,13 @@ echo "Mirror mode:  $MIRROR_MODE"
 [[ "$FORCE" == "true" ]] && echo "*** FORCE (skip digest check) ***"
 echo ""
 
-PACKAGES=$(gh api --paginate \
-    "orgs/${GH_ORG}/packages?package_type=container" \
-    --jq '.[].name')
+if [[ -n "$IMAGES" ]]; then
+    PACKAGES=$(tr ',' '\n' <<< "$IMAGES" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
+else
+    PACKAGES=$(gh api --paginate \
+        "orgs/${GH_ORG}/packages?package_type=container" \
+        --jq '.[].name')
+fi
 
 MIRRORED=()
 SKIPPED=()
@@ -84,22 +106,19 @@ FAILED=()
 while IFS= read -r package; do
     [[ -z "$package" ]] && continue
 
-    if [[ -n "$IMAGES" ]] && ! echo ",$IMAGES," | grep -q ",$package,"; then
-        continue
-    fi
-
-    if [[ -n "$EXCLUDE_IMAGES" ]] && echo ",$EXCLUDE_IMAGES," | grep -q ",$package,"; then
+    if [[ -n "$EXCLUDE_IMAGES" ]] && echo ",$EXCLUDE_IMAGES," | grep -qF ",$package,"; then
         continue
     fi
 
     echo "======== $package"
 
-    tags=$(gh api --paginate \
+    if ! tags=$(gh api --paginate \
         "orgs/${GH_ORG}/packages/container/${package}/versions" \
-        --jq '.[].metadata.container.tags[]' 2>/dev/null) || {
-        echo "  WARN: failed to fetch versions, skipping" >&2
+        --jq '.[].metadata.container.tags[]?'); then
+        echo "  WARN: failed to fetch versions for $package" >&2
+        FAILED+=("${SOURCE_REGISTRY}/${package} (list versions)")
         continue
-    }
+    fi
 
     if [[ -z "$tags" ]]; then
         echo "  no tagged versions, skipping"
@@ -117,22 +136,30 @@ while IFS= read -r package; do
         src="docker://${SOURCE_REGISTRY}/${package}:${tag}"
         dst="docker://${DEST_REGISTRY}/${package}:${tag}"
 
-        if [[ "$DRY_RUN" == "true" ]]; then
-            echo "  [dry-run] $src -> $dst"
-            MIRRORED+=("${DEST_REGISTRY}/${package}:${tag}")
-            continue
-        fi
-
         if [[ "$FORCE" != "true" ]]; then
-            dst_digest=$(get_manifest_digest "${DEST_REGISTRY}/${package}:${tag}")
+            if ! dst_digest=$(get_manifest_digest "${DEST_REGISTRY}/${package}:${tag}"); then
+                echo "  WARN: cannot inspect $dst" >&2
+                FAILED+=("${DEST_REGISTRY}/${package}:${tag} (inspect)")
+                continue
+            fi
             if [[ -n "$dst_digest" ]]; then
-                src_digest=$(get_manifest_digest "${SOURCE_REGISTRY}/${package}:${tag}")
+                if ! src_digest=$(get_manifest_digest "${SOURCE_REGISTRY}/${package}:${tag}"); then
+                    echo "  WARN: cannot inspect $src" >&2
+                    FAILED+=("${SOURCE_REGISTRY}/${package}:${tag} (inspect)")
+                    continue
+                fi
                 if [[ -n "$src_digest" && "$src_digest" == "$dst_digest" ]]; then
                     echo "  $tag  (up-to-date, skipped)"
                     SKIPPED+=("${DEST_REGISTRY}/${package}:${tag}")
                     continue
                 fi
             fi
+        fi
+
+        if [[ "$DRY_RUN" == "true" ]]; then
+            echo "  [dry-run] $src -> $dst"
+            MIRRORED+=("${DEST_REGISTRY}/${package}:${tag}")
+            continue
         fi
 
         echo "  $tag"

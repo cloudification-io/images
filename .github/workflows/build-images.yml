@@ -18,6 +18,10 @@ on:
         required: false
         default: ""
         type: string
+      mirror_dry_run:
+        description: "Run mirror images to Docker Hub in dry-run mode"
+        default: false
+        type: boolean
   push:
     branches: [main]
     paths:
@@ -299,3 +303,47 @@ jobs:
 
           git commit -m "Update Trivy reports"
           git push origin HEAD:gh-pages
+
+  mirror-to-dockerhub:
+    name: Mirror images to Docker Hub
+    needs:
+      - setup
+      - build
+    if: >-
+      ${{ !cancelled() &&
+          needs.setup.outputs.has_images == 'true' &&
+          contains(fromJson('["success", "failure"]'), needs.build.result) &&
+          (github.ref == 'refs/heads/main' || inputs.mirror_dry_run == true) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Log in to GHCR
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: skopeo login ghcr.io -u "$GHCR_USER" --password-stdin <<< "$GHCR_TOKEN"
+
+      - name: Log in to Docker Hub
+        env:
+          DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          : "${DOCKERHUB_USER:?DOCKERHUB_USERNAME secret is not set}"
+          : "${DOCKERHUB_TOKEN:?DOCKERHUB_TOKEN secret is not set}"
+          skopeo login docker.io -u "$DOCKERHUB_USER" --password-stdin <<< "$DOCKERHUB_TOKEN"
+
+      - name: Mirror images to Docker Hub
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ inputs.mirror_dry_run }}
+          IMAGES: ${{ join(fromJson(needs.setup.outputs.matrix).include.*.name, ',') }}
+        run: |
+          : "${IMAGES:?refusing to mirror with empty IMAGES}"
+          ./mirror-to-dockerhub.sh
