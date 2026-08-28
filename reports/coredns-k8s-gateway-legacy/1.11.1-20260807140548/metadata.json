@@ -1,9 +1,0 @@
-{
-  "image": "coredns-k8s-gateway-legacy",
-  "tag": "1.11.1-20260807140548",
-  "digest": "sha256:23fe41349c902139bd818864a70ea9e865e81a961cf8dbb8fad3240d442fa420",
-  "image_reference": "ghcr.io/cloudification-io/coredns-k8s-gateway-legacy@sha256:23fe41349c902139bd818864a70ea9e865e81a961cf8dbb8fad3240d442fa420",
-  "generated_at": "2026-08-07T14:09:33.290071+00:00",
-  "report": "index.html",
-  "critical_vulnerabilities": 13
-}
