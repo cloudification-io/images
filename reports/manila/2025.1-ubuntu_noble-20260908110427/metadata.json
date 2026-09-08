@@ -1,0 +1,9 @@
+{
+  "image": "manila",
+  "tag": "2025.1-ubuntu_noble-20260908110427",
+  "digest": "sha256:9a8708108c6cc64c11429c6c8c48ddd1c7136cede5808878131c01ef46bf0107",
+  "image_reference": "ghcr.io/cloudification-io/manila@sha256:9a8708108c6cc64c11429c6c8c48ddd1c7136cede5808878131c01ef46bf0107",
+  "generated_at": "2026-09-08T11:06:04.499399+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}
