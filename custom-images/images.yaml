@@ -146,3 +146,11 @@ images:
     tag_template: "{tools_version}-{release}"
     paths:
       - openstack-tools/
+
+  # SBOM discovery image - used to generate SBOMs for other images
+  - name: sbom-discovery
+    dockerfile: sbom-discovery/Dockerfile
+    context: sbom-discovery
+    tag_template: "1.0"
+    paths:
+      - sbom-discovery/
