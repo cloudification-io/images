@@ -1,0 +1,36 @@
+From 38afb3d74b03308f5359866364206ecb27d1797d Mon Sep 17 00:00:00 2001
+From: Kiran Pawar <kinpaa@gmail.com>
+Date: Sun, 6 Sep 2026 11:05:21 +0530
+Subject: [PATCH 1/2] mgr/rook: fix get_hosts to return InternalIP only
+
+When a node has multiple addresses (InternalIP, ExternalIP, Hostname),
+the original code joins them all with '/' which causes resolve_ip() to
+fail when trying to resolve the concatenated string as a hostname.
+
+Fix by selecting only the InternalIP address type.
+
+Signed-off-by: Cloudification <ops@cloudification.io>
+---
+ src/pybind/mgr/rook/rook_cluster.py | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/src/pybind/mgr/rook/rook_cluster.py b/src/pybind/mgr/rook/rook_cluster.py
+index 16d498a70e3..029546f038e 100644
+--- a/src/pybind/mgr/rook/rook_cluster.py
++++ b/src/pybind/mgr/rook/rook_cluster.py
+@@ -890,7 +890,11 @@ class RookCluster(object):
+         for node in self.nodes.items:
+             spec = orchestrator.HostSpec(
+                 node.metadata.name,
+-                addr='/'.join([addr.address for addr in node.status.addresses]), 
++                addr=next(
++                    (a.address for a in node.status.addresses
++                     if a.type == 'InternalIP'),
++                    node.status.addresses[0].address
++                ),
+                 labels=[label.split('/')[1] for label in node.metadata.labels if label.startswith('ceph-label')],
+             )
+             ret.append(spec)
+-- 
+2.43.0
+

@@ -1,0 +1,109 @@
+From ec1d33143df18fb07854b22ee784951b91d06462 Mon Sep 17 00:00:00 2001
+From: Kiran Pawar <kinpaa@gmail.com>
+Date: Sun, 6 Sep 2026 11:17:21 +0530
+Subject: [PATCH 2/2] mgr/nfs: fix cluster info for Rook deployments
+
+Two fixes for Rook-deployed NFS clusters:
+
+1. Use Kubernetes NFS Service ClusterIP instead of node IP for backend
+   addresses. With Rook, NFS daemons run as pods and their stable address
+   is the Kubernetes Service ClusterIP, not the node IP. Match the service
+   using the ceph_daemon_id label which maps exactly to the daemon_id
+   (e.g. 'ceph-nfs-a', 'ceph-nfs-b').
+
+2. Populate virtual_ip from Ceph config-key store for Rook deployments.
+   Rook does not deploy a Ceph ingress service, so virtual_ip is always
+   null when looking at ingress services. Allow operators to set the VIP
+   via: ceph config-key set mgr/nfs/<cluster_id>/virtual_ip <ip>
+---
+ src/pybind/mgr/nfs/cluster.py | 67 ++++++++++++++++++++++++++++++-----
+ 1 file changed, 58 insertions(+), 9 deletions(-)
+
+diff --git a/src/pybind/mgr/nfs/cluster.py b/src/pybind/mgr/nfs/cluster.py
+index d558a3a37a1..937e8875e82 100644
+--- a/src/pybind/mgr/nfs/cluster.py
++++ b/src/pybind/mgr/nfs/cluster.py
+@@ -205,15 +205,46 @@ class NFSCluster:
+                     if cluster.ip:
+                         ip = cluster.ip
+                     else:
+-                        c = self.mgr.get_hosts()
+-                        orchestrator.raise_if_exception(c)
+-                        hosts = [h for h in c.result or []
+-                                 if h.hostname == cluster.hostname]
+-                        if hosts:
+-                            ip = resolve_ip(hosts[0].addr)
+-                        else:
+-                            # sigh
+-                            ip = resolve_ip(cluster.hostname)
++                        # For Rook deployments, look up the Kubernetes
++                        # NFS Service ClusterIP instead of the node IP,
++                        # so that Manila export locations use a stable
++                        # Service IP that survives pod restarts.
++                        try:
++                            from kubernetes import client as k8s_client
++                            from kubernetes import config as k8s_config
++                            k8s_config.load_incluster_config()
++                            v1 = k8s_client.CoreV1Api()
++                            svcs = v1.list_namespaced_service('rook-ceph')
++                            nfs_svc_ip = None
++                            nfs_svc_name = None
++                            # daemon_id is like 'ceph-nfs-a' or 'ceph-nfs-b'
++                            # service label ceph_daemon_id matches exactly
++                            for svc in svcs.items:
++                                labels = svc.metadata.labels or {}
++                                if (labels.get('app') == 'rook-ceph-nfs' and
++                                        labels.get('ceph_daemon_id') == cluster.daemon_id):
++                                    nfs_svc_ip = svc.spec.cluster_ip
++                                    nfs_svc_name = svc.metadata.name
++                                    break
++                            if nfs_svc_ip and nfs_svc_name:
++                                ip = nfs_svc_ip
++                                cluster.hostname = nfs_svc_name
++                            else:
++                                raise Exception(
++                                    'NFS service not found for daemon: '
++                                    + str(cluster.daemon_id))
++                        except Exception:
++                            # Fall back to original behaviour if k8s
++                            # API is unavailable or service not found
++                            c = self.mgr.get_hosts()
++                            orchestrator.raise_if_exception(c)
++                            hosts = [h for h in c.result or []
++                                     if h.hostname == cluster.hostname]
++                            if hosts:
++                                ip = resolve_ip(hosts[0].addr)
++                            else:
++                                # sigh
++                                ip = resolve_ip(cluster.hostname)
+                     backends.append({
+                         "hostname": cluster.hostname,
+                         "ip": ip,
+@@ -236,6 +267,24 @@ class NFSCluster:
+                     r['port'] = i.ports[0]
+                     if len(i.ports) > 1:
+                         r['monitor_port'] = i.ports[1]
++
++        # For Rook deployments, no Ceph ingress service is deployed so
++        # virtual_ip is always null above. Allow operators to set the VIP
++        # via the config-key store:
++        #   ceph config-key set mgr/nfs/<cluster_id>/virtual_ip <ip>
++        if not r['virtual_ip']:
++            try:
++                ret, out, err = self.mgr.mon_command({
++                    'prefix': 'config-key get',
++                    'key': f'mgr/nfs/{cluster_id}/virtual_ip'
++                })
++                if ret == 0 and out:
++                    r['virtual_ip'] = out.strip()
++                    log.debug("virtual_ip from config-key: %s",
++                              r['virtual_ip'])
++            except Exception as e:
++                log.debug("Could not read virtual_ip from config-key: %s", e)
++
+         log.debug("Successfully fetched %s info: %s", cluster_id, r)
+         return r
+ 
+-- 
+2.43.0
+
