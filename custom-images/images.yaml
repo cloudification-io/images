@@ -154,3 +154,10 @@ images:
     tag_template: "1.0"
     paths:
       - sbom-discovery/
+
+  - name: ceph 
+    dockerfile: ceph/Dockerfile
+    context: ceph
+    tag_template: "v19.2.2"
+    paths:
+      - ceph/
