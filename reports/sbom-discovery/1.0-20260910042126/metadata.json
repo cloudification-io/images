@@ -1,0 +1,9 @@
+{
+  "image": "sbom-discovery",
+  "tag": "1.0-20260910042126",
+  "digest": "sha256:4ce4b874677f94f1cfb71b313bc999a758b9bd16b6f7d1bff5892c451fa40630",
+  "image_reference": "ghcr.io/cloudification-io/sbom-discovery@sha256:4ce4b874677f94f1cfb71b313bc999a758b9bd16b6f7d1bff5892c451fa40630",
+  "generated_at": "2026-09-10T04:21:54.790640+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}
