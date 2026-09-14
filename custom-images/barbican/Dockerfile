@@ -11,3 +11,15 @@ RUN uv pip install -c /upper-constraints.txt jaeger-client
 
 FROM quay.io/airshipit/barbican:${BASE_TAG}
 COPY --from=build --link /var/lib/openstack /var/lib/openstack
+
+RUN apt-get update \
+    && apt-get remove -y \
+        linux-libc-dev \
+        libc6-dev \
+        libexpat1-dev \
+        libpython3-dev \
+        libpython3.12-dev \
+        python3-dev \
+        python3.12-dev \
+        zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
