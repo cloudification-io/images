@@ -33,6 +33,5 @@ RUN pip3 install --break-system-packages -c https://raw.githubusercontent.com/op
         openstack-placement osc-placement networking-l2gw osprofiler \
         python-barbicanclient gnocchiclient python-cloudkittyclient \
         python-masakariclient \
-        python-designateclient python-manilaclient python-heatclient \
-        "neutron-fwaas @ git+https://opendev.org/openstack/neutron-fwaas.git@${NEUTRON_FWAAS_REF}" && \
+        python-designateclient python-manilaclient python-heatclient && \
     openstack complete > /etc/bash_completion.d/osc.bash_completion
