@@ -5,6 +5,7 @@ ENV OS_PLACEMENT_API_VERSION=1.39
 
 ARG OPENSTACK_RELEASE=2025.1
 ARG openstack_release=stable/${OPENSTACK_RELEASE}
+ARG NEUTRON_FWAAS_REF=stable/${OPENSTACK_RELEASE}
 ARG kubectl_version=v1.31
 ARG fzf_completion_version=0.48.1
 
@@ -32,5 +33,6 @@ RUN pip3 install --break-system-packages -c https://raw.githubusercontent.com/op
         openstack-placement osc-placement networking-l2gw osprofiler \
         python-barbicanclient gnocchiclient python-cloudkittyclient \
         python-masakariclient \
-        python-designateclient python-manilaclient python-heatclient && \
+        python-designateclient python-manilaclient python-heatclient \
+        "neutron-fwaas @ git+https://opendev.org/openstack/neutron-fwaas.git@${NEUTRON_FWAAS_REF}" && \
     openstack complete > /etc/bash_completion.d/osc.bash_completion
