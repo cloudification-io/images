@@ -27,15 +27,17 @@ is_timestamp_tag() {
 }
 
 get_manifest_digest() {
-    local raw
-    if ! raw=$(skopeo inspect --raw "docker://$1" 2>&1); then
-        # absent tag/repo -> empty digest; other errors must not read as absent
-        if grep -qiE 'manifest unknown|name unknown|not found|requested access to the resource is denied|authentication required' <<< "$raw"; then
-            return 0
-        fi
-        printf '%s\n' "$raw" >&2
-        return 1
+    local raw err rc=0
+    err=$(mktemp)
+    raw=$(skopeo inspect --raw --retry-times 3 "docker://$1" 2>"$err") || rc=$?
+    # absent tag/repo -> empty digest; other errors must not read as absent
+    if (( rc != 0 )) && grep -qiE 'manifest unknown|name unknown|not found|requested access to the resource is denied|authentication required' "$err"; then
+        rm -f "$err"
+        return 0
     fi
+    cat "$err" >&2
+    rm -f "$err"
+    (( rc == 0 )) || return 1
     printf '%s' "$raw" | sha256sum | awk '{print $1}'
 }
 
