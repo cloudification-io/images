@@ -1,0 +1,9 @@
+{
+  "image": "masakari",
+  "tag": "2025.1-ubuntu_noble-20261002122135",
+  "digest": "sha256:314ee1a022446eacf49e7fc6b7268cf88da81f46557b9fb5b5b0c278967fbd91",
+  "image_reference": "ghcr.io/cloudification-io/masakari@sha256:314ee1a022446eacf49e7fc6b7268cf88da81f46557b9fb5b5b0c278967fbd91",
+  "generated_at": "2026-10-02T12:22:50.856660+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 1
+}

@@ -1,0 +1,9 @@
+{
+  "image": "ceph",
+  "tag": "v19.2.2-20261002122137",
+  "digest": "sha256:9b6b94ac53b1d36fce6aa839f4400e12fa0a8ccfcc4f23b40f3cae67054a77c7",
+  "image_reference": "ghcr.io/cloudification-io/ceph@sha256:9b6b94ac53b1d36fce6aa839f4400e12fa0a8ccfcc4f23b40f3cae67054a77c7",
+  "generated_at": "2026-10-02T12:24:35.453481+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}

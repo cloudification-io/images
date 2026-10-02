@@ -1,0 +1,9 @@
+{
+  "image": "openstack-tools",
+  "tag": "1.0-2025.1-20261002122135",
+  "digest": "sha256:9de3f1e98f54776e8c02363409d649f579ace3edf52dba0fbf8500db82b6eabc",
+  "image_reference": "ghcr.io/cloudification-io/openstack-tools@sha256:9de3f1e98f54776e8c02363409d649f579ace3edf52dba0fbf8500db82b6eabc",
+  "generated_at": "2026-10-02T12:23:24.542684+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 1
+}
