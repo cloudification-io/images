@@ -2,11 +2,19 @@
 
 import argparse
 import json
+import re
 import shutil
 from dataclasses import dataclass
 from datetime import datetime
 from html import escape
 from pathlib import Path
+
+
+TIMESTAMP_SUFFIX = re.compile(r"-\d{14}$")
+
+
+def tag_prefix(tag: str) -> str:
+    return TIMESTAMP_SUFFIX.sub("", tag)
 
 
 @dataclass(frozen=True)
@@ -97,6 +105,11 @@ def parse_arguments() -> argparse.Namespace:
         required=True,
         type=Path,
         help="Directory containing the GitHub Pages site.",
+    )
+    parser.add_argument(
+        "--live-tags",
+        type=Path,
+        help="File with one 'image tag-prefix' pair per line; report groups not listed are removed.",
     )
     parser.add_argument(
         "--keep",
@@ -206,9 +219,21 @@ def load_report_metadata(report_directory: Path) -> ReportMetadata:
     return load_metadata(metadata_file)
 
 
+def load_live_tags(live_tags_file: Path) -> set[tuple[str, str]]:
+    live: set[tuple[str, str]] = set()
+    for line in live_tags_file.read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            image, prefix = line.split(maxsplit=1)
+            live.add((image, prefix))
+    if not live:
+        raise ValueError(f"No live tags found in {live_tags_file}")
+    return live
+
+
 def cleanup_old_reports(
     site_directory: Path,
     keep: int,
+    live_tags: set[tuple[str, str]] | None,
 ) -> None:
     reports_directory = site_directory / "reports"
 
@@ -219,42 +244,50 @@ def cleanup_old_reports(
         if not image_directory.is_dir():
             continue
 
-        report_directories = sorted(
-            (
-                directory
-                for directory in image_directory.iterdir()
-                if directory.is_dir()
-            ),
-            key=lambda directory: datetime.fromisoformat(
-              load_report_metadata(directory).generated_at),
+        for prefix, reports in group_reports_by_prefix(image_directory).items():
+            if live_tags is not None and (image_directory.name, prefix) not in live_tags:
+                stale = reports
+                print(f"Removed reports of {image_directory.name}:{prefix}, no longer built")
+            else:
+                stale = reports[:-keep]
+            for report in stale:
+                shutil.rmtree(report.source_directory)
+                print(f"Removed old report: {report.source_directory}")
+
+        if not any(directory.is_dir() for directory in image_directory.iterdir()):
+            shutil.rmtree(image_directory)
+            print(f"Removed empty image directory: {image_directory}")
+
+
+def group_reports_by_prefix(
+    image_directory: Path,
+) -> dict[str, list[ReportMetadata]]:
+    """Reports of one image keyed by tag prefix (tag minus timestamp), oldest first."""
+    groups: dict[str, list[ReportMetadata]] = {}
+
+    for report_directory in image_directory.iterdir():
+        if not report_directory.is_dir():
+            continue
+        report = load_report_metadata(report_directory)
+        groups.setdefault(tag_prefix(report.tag), []).append(report)
+
+    for reports in groups.values():
+        reports.sort(
+            key=lambda report: datetime.fromisoformat(report.generated_at),
         )
 
-        if len(report_directories) <= keep:
-            continue
-
-        directories_to_remove = report_directories[:-keep]
-
-        for directory in directories_to_remove:
-            shutil.rmtree(directory)
-            print(f"Removed old report: {directory}")
+    return dict(sorted(groups.items()))
 
 
-def get_latest_report(image_directory: Path) -> ReportMetadata:
-    report_entries = [
-        load_report_metadata(report_directory)
-        for report_directory in image_directory.iterdir()
-        if report_directory.is_dir()
-    ]
+def get_latest_reports(image_directory: Path) -> dict[str, ReportMetadata]:
+    groups = group_reports_by_prefix(image_directory)
 
-    if not report_entries:
+    if not groups:
         raise ValueError(
             f"No reports found for image: {image_directory.name}"
         )
 
-    return max(
-        report_entries,
-        key=lambda report: datetime.fromisoformat(report.generated_at),
-    )
+    return {prefix: reports[-1] for prefix, reports in groups.items()}
 
 
 def generate_image_indexes(site_directory: Path) -> None:
@@ -337,22 +370,20 @@ def generate_root_index(site_directory: Path) -> None:
     image_links_entries: list[str] = []
 
     for image_directory in image_directories:
-        latest_report = get_latest_report(image_directory)
-
-        critical_badge = ""
-        if latest_report.critical_vulnerabilities > 0:
-            critical_badge = (
-                '<span class="critical-badge">'
-                f"Critical: {latest_report.critical_vulnerabilities}"
-                "</span>"
-            )
+        critical_badges = "".join(
+            '<span class="critical-badge">'
+            f"{escape(prefix)}: Critical {report.critical_vulnerabilities}"
+            "</span>"
+            for prefix, report in get_latest_reports(image_directory).items()
+            if report.critical_vulnerabilities > 0
+        )
 
         image_links_entries.append(
             '<li class="card">'
             f'<a href="reports/{escape(image_directory.name)}/">'
             f"{escape(image_directory.name)}"
             "</a>"
-            f"{critical_badge}"
+            f"{critical_badges}"
             "</li>"
         )
 
@@ -410,9 +441,15 @@ def main() -> None:
         site_directory=args.site_dir,
     )
 
+    try:
+        live_tags = load_live_tags(args.live_tags) if args.live_tags else None
+    except (OSError, ValueError) as error:
+        raise SystemExit(str(error)) from error
+
     cleanup_old_reports(
         site_directory=args.site_dir,
         keep=args.keep,
+        live_tags=live_tags,
     )
 
     generate_image_indexes(

@@ -4,14 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       openstack_release:
-        description: "OpenStack release"
-        required: true
-        default: "2025.1"
-        type: string
-      tools_version:
-        description: "openstack-tools version"
-        required: true
-        default: "1.0"
+        description: "OpenStack release filter (empty = all; a value also drops images without releases, e.g. ceph)"
+        required: false
+        default: ""
         type: string
       images:
         description: "Comma-separated image names (empty = all)"
@@ -26,6 +21,9 @@ on:
     branches: [main]
     paths:
       - "custom-images/**"
+  schedule:
+    # weekly: rebuild rows whose upstream base image digest changed
+    - cron: "0 3 * * 1"
 
 env:
   REGISTRY: ghcr.io
@@ -37,15 +35,38 @@ concurrency:
 
 jobs:
   setup:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # skopeo >= 1.19 retries registry 502/503/504 responses
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: read
     outputs:
       matrix: ${{ steps.matrix.outputs.result }}
       has_images: ${{ steps.matrix.outputs.has_images }}
+      names: ${{ steps.matrix.outputs.names }}
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+
+      - name: Install skopeo
+        if: github.event_name == 'schedule'
+        run: sudo apt-get update && sudo apt-get install -y skopeo
+
+      - name: Log in to ghcr.io
+        if: github.event_name == 'schedule'
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: skopeo login ghcr.io -u "$GHCR_USER" --password-stdin <<< "$GHCR_TOKEN"
+
+      - name: Log in to Docker Hub
+        if: github.event_name == 'schedule' && env.DOCKERHUB_USERNAME != ''
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: skopeo login docker.io -u "$DOCKERHUB_USERNAME" --password-stdin <<< "$DOCKERHUB_TOKEN"
 
       - name: Detect changed files
         id: changes
@@ -70,43 +91,16 @@ jobs:
       - name: Build matrix from images.yaml
         id: matrix
         env:
-          RELEASE: ${{ inputs.openstack_release || '2025.1' }}
-          TOOLS: ${{ inputs.tools_version || '1.0' }}
-          FILTER: ${{ inputs.images }}
+          OPENSTACK_RELEASE: ${{ inputs.openstack_release }}
+          IMAGES: ${{ inputs.images }}
           EVENT: ${{ github.event_name }}
           CHANGED_FILES: ${{ steps.changes.outputs.files }}
         run: |
-          # Read YAML into JSON with all fields including paths
-          MATRIX=$(yq -o=json '{
-            "include": [.images[] | {
-              "name": .name,
-              "dockerfile": ("custom-images/" + .dockerfile),
-              "context": ("custom-images/" + .context),
-              "tag_prefix": .tag_template,
-              "release": (.release // ""),
-              "paths": (.paths // [])
-            }]
-          }' custom-images/images.yaml)
-
-          # Compute effective release per image (per-image override wins, else global $release),
-          # then substitute {release}/{tools_version} placeholders.
-          MATRIX=$(echo "$MATRIX" | jq -c \
-            --arg release "$RELEASE" \
-            --arg tools "$TOOLS" \
-            '.include |= [.[] |
-              ((if .release == "" then $release else .release end) as $eff |
-               .effective_release = $eff |
-               .tag_prefix |= (gsub("{release}"; $eff) | gsub("{tools_version}"; $tools)) |
-               .dockerfile |= gsub("{release}"; $eff) |
-               .context |= gsub("{release}"; $eff))]')
-
-          # Filter by image names if requested (workflow_dispatch)
-          if [ -n "$FILTER" ]; then
-            MATRIX=$(echo "$MATRIX" | jq -c --arg f "$FILTER" '
-              .include |= [.[] | select(
-                .name as $n | ($f | split(",") | map(gsub("\\s";"")) | index($n)) != null
-              )]')
-          fi
+          # One row per (image, release); dispatch filters are applied by the script
+          ROWS=$(custom-images/matrix.sh)
+          ROWS=$(echo "$ROWS" | jq -c '[.[] |
+            .dockerfile |= ("custom-images/" + .) |
+            .context |= ("custom-images/" + .)]')
 
           # Filter by changed paths on push events
           if [ "$EVENT" = "push" ]; then
@@ -116,9 +110,9 @@ jobs:
             if echo "$CHANGED" | jq -e 'any(. == "images.yaml")' > /dev/null 2>&1; then
               echo "images.yaml changed — rebuilding all images"
             else
-              # Keep only images where at least one changed file starts with one of the image's paths
-              MATRIX=$(echo "$MATRIX" | jq -c --argjson changed "$CHANGED" '
-                .include |= [.[] | select(
+              # Keep only rows where at least one changed file starts with one of the image's paths
+              ROWS=$(echo "$ROWS" | jq -c --argjson changed "$CHANGED" '
+                [.[] | select(
                   .paths as $paths |
                   any($changed[]; . as $file |
                     any($paths[]; . as $p | ($file | startswith($p)))
@@ -127,19 +121,53 @@ jobs:
             fi
           fi
 
-          # Remove paths and raw release field from final matrix (build job consumes effective_release)
-          MATRIX=$(echo "$MATRIX" | jq -c '.include |= [.[] | del(.paths, .release)]')
+          # On schedule, keep only rows whose base image digest differs from the
+          # one recorded on our last clean tag (org.opencontainers.image.base.digest)
+          if [ "$EVENT" = "schedule" ]; then
+            source ./mirror-lib.sh
+            declare -A UPSTREAM
+            DECISIONS='[]'
+            while IFS=$'\t' read -r row_id name tag_prefix base_image; do
+              upstream=""; recorded=""; keep=false; reason="no base_image"
+              if [ -n "$base_image" ]; then
+                if [ -z "${UPSTREAM[$base_image]:-}" ]; then
+                  UPSTREAM[$base_image]=$(get_manifest_digest "$base_image")
+                  [ -n "${UPSTREAM[$base_image]}" ] || { echo "ERROR: base image $base_image not found" >&2; exit 1; }
+                fi
+                upstream=${UPSTREAM[$base_image]}
+                recorded=$(get_image_label "${IMAGE_PREFIX}/${name}:${tag_prefix}" org.opencontainers.image.base.digest)
+                if [ -z "$recorded" ]; then keep=true; reason="tag or label missing"
+                elif [ "$recorded" != "$upstream" ]; then keep=true; reason="base changed"
+                else reason="up to date"; fi
+              fi
+              DECISIONS=$(jq -c --arg id "$row_id" --arg u "$upstream" --arg r "$recorded" --argjson k "$keep" --arg why "$reason" \
+                '. + [{row_id:$id, upstream:$u, recorded:$r, keep:$k, reason:$why}]' <<<"$DECISIONS")
+            done < <(jq -r '.[] | [.row_id, .name, .tag_prefix, .base_image] | @tsv' <<<"$ROWS")
+
+            ROWS=$(jq -c --argjson d "$DECISIONS" \
+              '($d | map(select(.keep) | .row_id)) as $k | [.[] | select(.row_id as $r | $k | index($r) != null)]' <<<"$ROWS")
+
+            {
+              echo "### Base image digest check"
+              echo "| row | upstream | recorded | decision |"
+              echo "|---|---|---|---|"
+              jq -r '.[] | "| \(.row_id) | \(.upstream[7:19]) | \(.recorded[7:19]) | \(if .keep then "rebuild" else "skip" end) (\(.reason)) |"' <<<"$DECISIONS"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          MATRIX=$(echo "$ROWS" | jq -c '{include: [.[] | del(.paths)]}')
 
           IMAGE_COUNT=$(echo "$MATRIX" | jq '.include | length')
-          echo "Images to build: $IMAGE_COUNT"
-          echo "$MATRIX" | jq -r '.include[].name'
+          echo "Rows to build: $IMAGE_COUNT"
+          echo "$MATRIX" | jq -r '.include[].row_id'
 
           if [ "$IMAGE_COUNT" -gt 0 ]; then
             echo "has_images=true" >> "$GITHUB_OUTPUT"
           else
             echo "has_images=false" >> "$GITHUB_OUTPUT"
           fi
-          echo "result=$(echo "$MATRIX" | jq -c)" >> "$GITHUB_OUTPUT"
+          echo "result=$MATRIX" >> "$GITHUB_OUTPUT"
+          echo "names=$(echo "$MATRIX" | jq -r '[.include[].name] | unique | join(",")')" >> "$GITHUB_OUTPUT"
 
   build:
     needs: setup
@@ -166,6 +194,25 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Log in to Docker Hub
+        if: env.DOCKERHUB_USERNAME != ''
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        uses: docker/login-action@v4.6.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Resolve base image digest
+        id: base
+        if: matrix.base_image != ''
+        env:
+          BASE_IMAGE: ${{ matrix.base_image }}
+        run: |
+          DIGEST=$(skopeo inspect --raw --retry-times 3 "docker://$BASE_IMAGE" | skopeo manifest-digest /dev/stdin)
+          echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
+          echo "$BASE_IMAGE@$DIGEST"
+
       - name: Generate timestamp tag
         id: tag
         env:
@@ -183,6 +230,9 @@ jobs:
           tags: |
             type=raw,value=${{ steps.tag.outputs.full_tag }}
             type=raw,value=${{ matrix.tag_prefix }}
+          labels: |
+            ${{ matrix.base_image && format('org.opencontainers.image.base.name={0}', matrix.base_image) || '' }}
+            ${{ steps.base.outputs.digest && format('org.opencontainers.image.base.digest={0}', steps.base.outputs.digest) || '' }}
 
       - name: Build and push
         id: build
@@ -195,10 +245,10 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            OPENSTACK_RELEASE=${{ matrix.effective_release }}
+            ${{ matrix.release && format('OPENSTACK_RELEASE={0}', matrix.release) || '' }}
             CACHE_BUST=${{ github.run_id }}-${{ github.run_attempt }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ matrix.row_id }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.row_id }}
 
       - name: Prepare Trivy report directory
         run: mkdir -p "trivy-reports/${{ matrix.name }}"
@@ -233,15 +283,16 @@ jobs:
       - name: Upload Trivy report
         uses: actions/upload-artifact@v7
         with:
-          name: trivy-report-${{ matrix.name }}
+          name: trivy-report-${{ matrix.row_id }}
           path: trivy-reports/${{ matrix.name }}
 
       - name: Add to job summary
         env:
           IMAGE_NAME: ${{ matrix.name }}
+          ROW_ID: ${{ matrix.row_id }}
           FULL_TAG: ${{ steps.tag.outputs.full_tag }}
         run: |
-          echo "### ${IMAGE_NAME}" >> "$GITHUB_STEP_SUMMARY"
+          echo "### ${ROW_ID}" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           echo "${IMAGE_PREFIX}/${IMAGE_NAME}:${FULL_TAG}" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
@@ -275,10 +326,12 @@ jobs:
 
       - name: Prepare GitHub Pages content
         run: |
+          custom-images/matrix.sh | jq -r '.[] | "\(.name) \(.tag_prefix)"' > live-tags.txt
           python3 .github/scripts/publish-trivy-reports.py \
             --input-dir trivy-reports \
             --site-dir site \
-            --keep 10
+            --keep 10 \
+            --live-tags live-tags.txt
 
       - name: Configure Git
         working-directory: site
@@ -344,7 +397,7 @@ jobs:
           MIRROR_MODE: recent
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DRY_RUN: ${{ inputs.mirror_dry_run }}
-          IMAGES: ${{ join(fromJson(needs.setup.outputs.matrix).include.*.name, ',') }}
+          IMAGES: ${{ needs.setup.outputs.names }}
         run: |
           : "${IMAGES:?refusing to mirror with empty IMAGES}"
           ./mirror-to-dockerhub.sh

@@ -1,6 +1,18 @@
 # Custom images for Openstack
 
-## Building all images for new Openstack release
+## Image definitions
+
+[images.yaml](custom-images/images.yaml) lists every image with the OpenStack releases it is built for (`releases`) and its upstream base image (`base_image`). One image is built per (image, release) pair, so adding a release means appending it to the relevant `releases` lists. `custom-images/matrix.sh` expands the file into build rows and is used by both the local script and CI.
+
+## Building images locally
+
+Builds every listed release of every image and pushes the result:
+
+```bash
+bash custom-images/build-local.sh
+```
+
+The openstack-tools version is part of its `tag_template` in `images.yaml`; bump it there.
 
 (Optional) To disable timestamps use this
 
@@ -8,27 +20,24 @@
 export USE_TIMESTAMP="false"
 ```
 
-Executing this commands will build and push all Openstack images
+## Building specific images or releases only
+
+`IMAGES` takes a comma-separated list of image names, `OPENSTACK_RELEASE` a single release; both are filters, empty means all. A release filter never matches images without releases (openvswitch, sbom-discovery, ceph); build those by name.
 
 ```bash
-export OPENSTACK_RELEASE="2025.1"
-export TOOLS_VERSION="1.0" # increment this
-
-bash custom-images/build-local.sh
-```
-
-## Building specific images only
-
-Use the `IMAGES` variable with a comma-separated list of image names:
-
-```bash
-export OPENSTACK_RELEASE="2025.1"
 export IMAGES="nova,neutron"
+export OPENSTACK_RELEASE="2026.1"
 
 bash custom-images/build-local.sh
 ```
 
-Available image names can be found in [images.yaml](custom-images/images.yaml).
+## CI builds
+
+[build-images.yml](.github/workflows/build-images.yml) builds and pushes to `ghcr.io/cloudification-io`:
+
+- on push to `main`, the images whose files changed (every release of them; an `images.yaml` change rebuilds everything)
+- weekly (Monday 03:00 UTC), the rows whose `base_image` digest differs from the one recorded on the last build (label `org.opencontainers.image.base.digest`); the job summary lists the decision per row
+- on `workflow_dispatch`, with the same `images` and `openstack_release` filters as the local script; leave both empty to force a full rebuild
 
 ## Mirroring upstream images
 
@@ -38,7 +47,7 @@ Available image names can be found in [images.yaml](custom-images/images.yaml).
 
 Mirror images from `ghcr.io/cloudification-io` to `docker.io/cloudification` using [skopeo](https://github.com/containers/skopeo). The script mirrors the images listed in `IMAGES`, or discovers all packages via the GitHub API when `IMAGES` is unset.
 
-In CI, the `mirror-to-dockerhub` job in [build-images.yml](.github/workflows/build-images.yml) runs the script after image builds, using the `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` repository secrets. Only runs on `main` publish; a `workflow_dispatch` from any branch can preview the mirroring with the `mirror_dry_run` input.
+In CI, the `mirror-to-dockerhub` job in [build-images.yml](.github/workflows/build-images.yml) runs the script after image builds, using the `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` repository secrets. Runs after `main` push and scheduled builds; a `workflow_dispatch` from any branch can preview the mirroring with the `mirror_dry_run` input.
 
 ### Prerequisites
 
