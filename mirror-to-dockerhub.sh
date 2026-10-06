@@ -10,7 +10,8 @@ set -euo pipefail
 #   DRY_RUN=true ./mirror-to-dockerhub.sh                 # preview
 #   IMAGES=nova,horizon ./mirror-to-dockerhub.sh           # specific images only
 #   MIRROR_MODE=clean ./mirror-to-dockerhub.sh             # skip timestamped tags
-#   EXCLUDE_IMAGES=coredns-k8s-gateway ./mirror-to-dockerhub.sh  # skip some images
+#   MIRROR_MODE=recent ./mirror-to-dockerhub.sh            # clean tags plus the newest timestamped tag per prefix
+#   EXCLUDE_IMAGES=sbom-discovery ./mirror-to-dockerhub.sh # skip some images
 #   FORCE=true ./mirror-to-dockerhub.sh                    # skip digest check, copy everything
 
 SOURCE_REGISTRY="${SOURCE_REGISTRY:-ghcr.io/cloudification-io}"
@@ -22,54 +23,35 @@ MIRROR_MODE="${MIRROR_MODE:-all}"
 DRY_RUN="${DRY_RUN:-false}"
 FORCE="${FORCE:-false}"
 
-is_timestamp_tag() {
-    [[ "$1" =~ -[0-9]{14}$ ]]
+# shellcheck source=mirror-lib.sh
+source "$(cd "$(dirname "$0")" && pwd)/mirror-lib.sh"
+
+clean_tags() {
+    local tag
+    while IFS= read -r tag; do
+        if [[ -n "$tag" ]] && ! is_timestamp_tag "$tag"; then
+            echo "$tag"
+        fi
+    done <<< "$1"
 }
 
-get_manifest_digest() {
-    local raw err rc=0
-    err=$(mktemp)
-    raw=$(skopeo inspect --raw --retry-times 3 "docker://$1" 2>"$err") || rc=$?
-    # absent tag/repo -> empty digest; other errors must not read as absent
-    if (( rc != 0 )) && grep -qiE 'manifest unknown|name unknown|not found|requested access to the resource is denied|authentication required' "$err"; then
-        rm -f "$err"
-        return 0
-    fi
-    cat "$err" >&2
-    rm -f "$err"
-    (( rc == 0 )) || return 1
-    printf '%s' "$raw" | sha256sum | awk '{print $1}'
+# newest timestamped tag per prefix; a package can carry several prefixes
+newest_timestamped_tags() {
+    local tag
+    while IFS= read -r tag; do
+        if [[ -n "$tag" ]] && is_timestamp_tag "$tag"; then
+            printf '%s %s\n' "$(tag_prefix "$tag")" "$tag"
+        fi
+    done <<< "$1" | sort -k1,1 -k2,2 | awk '{ latest[$1] = $2 } END { for (p in latest) print latest[p] }'
 }
 
 filter_tags() {
     local all_tags="$1"
     case "$MIRROR_MODE" in
-        clean)
-            while IFS= read -r tag; do
-                if [[ -n "$tag" ]] && ! is_timestamp_tag "$tag"; then
-                    echo "$tag"
-                fi
-            done <<< "$all_tags"
-            ;;
-        latest-timestamped)
-            # newest per prefix; a package can carry several prefixes
-            while IFS= read -r tag; do
-                if [[ -n "$tag" ]] && is_timestamp_tag "$tag"; then
-                    echo "$tag"
-                fi
-            done <<< "$all_tags" | awk '{
-                prefix = substr($0, 1, length($0) - 15)
-                ts = substr($0, length($0) - 13)
-                if (ts > latest[prefix]) latest[prefix] = ts
-            } END { for (p in latest) print p "-" latest[p] }'
-            ;;
-        all)
-            while IFS= read -r tag; do
-                if [[ -n "$tag" ]]; then
-                    echo "$tag"
-                fi
-            done <<< "$all_tags"
-            ;;
+        clean)              clean_tags "$all_tags" ;;
+        latest-timestamped) newest_timestamped_tags "$all_tags" ;;
+        recent)             clean_tags "$all_tags"; newest_timestamped_tags "$all_tags" ;;
+        all)                grep -v '^$' <<< "$all_tags" || true ;;
         *)
             echo "ERROR: Unknown MIRROR_MODE: $MIRROR_MODE" >&2
             exit 1
@@ -77,7 +59,7 @@ filter_tags() {
     esac
 }
 
-for cmd in gh skopeo sha256sum; do
+for cmd in gh skopeo; do
     if ! command -v "$cmd" &>/dev/null; then
         echo "ERROR: $cmd is not installed" >&2
         exit 1

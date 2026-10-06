@@ -341,6 +341,7 @@ jobs:
 
       - name: Mirror images to Docker Hub
         env:
+          MIRROR_MODE: recent
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DRY_RUN: ${{ inputs.mirror_dry_run }}
           IMAGES: ${{ join(fromJson(needs.setup.outputs.matrix).include.*.name, ',') }}
