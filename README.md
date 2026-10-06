@@ -30,6 +30,10 @@ bash custom-images/build-local.sh
 
 Available image names can be found in [images.yaml](custom-images/images.yaml).
 
+## Mirroring upstream images
+
+[mirror-upstream.yml](.github/workflows/mirror-upstream.yml) copies the images in [mirror-images.yaml](mirror-images.yaml) from quay.io to `ghcr.io/cloudification-io` with `mirror-to-ghcr.sh`, on a push that changes the file and weekly (Monday 02:00 UTC). Kolla entries list their `releases` and use `{release}` in the tag. A tag is copied only when its upstream digest differs from the unsuffixed copy on GHCR, so unchanged images get no new dated tag; the `force` dispatch input (or `FORCE=true`) copies everything.
+
 ## Mirroring images to Docker Hub
 
 Mirror images from `ghcr.io/cloudification-io` to `docker.io/cloudification` using [skopeo](https://github.com/containers/skopeo). The script mirrors the images listed in `IMAGES`, or discovers all packages via the GitHub API when `IMAGES` is unset.
@@ -74,6 +78,12 @@ Or only the latest timestamped tag per tag prefix:
 
 ```bash
 MIRROR_MODE=latest-timestamped bash mirror-to-dockerhub.sh
+```
+
+CI uses `MIRROR_MODE=recent`, the clean tags plus the latest timestamped tag per prefix, so a run does not re-inspect every historical tag:
+
+```bash
+MIRROR_MODE=recent bash mirror-to-dockerhub.sh
 ```
 
 ### Excluding images

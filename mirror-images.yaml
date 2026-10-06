@@ -2,6 +2,8 @@
 #
 # Each tag entry copies source:tag -> ghcr:name:tag.
 # Optional "alias" also pushes the same image as ghcr:name:alias (e.g. a clean "latest" tag).
+# Optional "releases" (quoted strings) expands {release} in the tags, one copy per release.
+# A tag is copied only when its upstream digest differs from ghcr:name:tag (FORCE=true overrides).
 images:
   # OSH images
   - name: ceph-config-helper
@@ -28,26 +30,30 @@ images:
   - name: designate-backend-bind9
     source: quay.io/openstack.kolla/designate-backend-bind9
     suffix_tag: true
+    releases: ["2025.1", "2026.1"]
     tags:
-      - tag: 2025.1-ubuntu-noble
+      - tag: "{release}-ubuntu-noble"
 
   - name: ceilometer-central
     source: quay.io/openstack.kolla/ceilometer-central
     suffix_tag: true
+    releases: ["2026.1"]
     tags:
-      - tag: 2026.1-ubuntu-noble
+      - tag: "{release}-ubuntu-noble"
 
   - name: ceilometer-compute
     source: quay.io/openstack.kolla/ceilometer-compute
     suffix_tag: true
+    releases: ["2026.1"]
     tags:
-      - tag: 2026.1-ubuntu-noble
+      - tag: "{release}-ubuntu-noble"
 
   - name: ceilometer-notification
     source: quay.io/openstack.kolla/ceilometer-notification
     suffix_tag: true
+    releases: ["2026.1"]
     tags:
-      - tag: 2026.1-ubuntu-noble
+      - tag: "{release}-ubuntu-noble"
 
 # NOTE: we build custom image with uwsgi
 # See custom-images/gnocchi-api
@@ -60,8 +66,9 @@ images:
   - name: gnocchi-base
     source: quay.io/openstack.kolla/gnocchi-base
     suffix_tag: true
+    releases: ["2026.1"]
     tags:
-      - tag: 2026.1-ubuntu-noble
+      - tag: "{release}-ubuntu-noble"
 
 # NOTE: we build custom image with pinned numpy
 # See custom-images/gnocchi-metricd
@@ -74,5 +81,6 @@ images:
   - name: gnocchi-statsd
     source: quay.io/openstack.kolla/gnocchi-statsd
     suffix_tag: true
+    releases: ["2026.1"]
     tags:
-      - tag: 2026.1-ubuntu-noble
+      - tag: "{release}-ubuntu-noble"

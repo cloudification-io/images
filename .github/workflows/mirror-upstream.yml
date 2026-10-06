@@ -17,10 +17,17 @@ on:
         description: "Run mirror images to Docker Hub in dry-run mode"
         default: false
         type: boolean
+      force:
+        description: "Copy images whose upstream digest is unchanged"
+        default: false
+        type: boolean
   push:
     branches: [main]
     paths:
       - "mirror-images.yaml"
+  schedule:
+    # weekly: re-copy tags whose upstream digest changed
+    - cron: "0 2 * * 1"
 
 env:
   IMAGE_PREFIX: ghcr.io/cloudification-io
@@ -59,6 +66,7 @@ jobs:
         env:
           IMAGES: ${{ inputs.images }}
           SUFFIX: ${{ steps.suffix.outputs.value }}
+          FORCE: ${{ inputs.force }}
         run: ./mirror-to-ghcr.sh
 
   mirror-to-dockerhub:
@@ -96,6 +104,7 @@ jobs:
 
       - name: Mirror images to Docker Hub
         env:
+          MIRROR_MODE: recent
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DRY_RUN: ${{ inputs.mirror_dry_run }}
           INPUT_IMAGES: ${{ inputs.images }}
