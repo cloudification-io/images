@@ -1,18 +1,18 @@
 #!/bin/bash
+# Build (and push) the images defined in images.yaml, one build per (image, release).
+#
+#   IMAGES=nova,keystone      only these image names (empty = all)
+#   OPENSTACK_RELEASE=2026.1  only this release (empty = all releases listed in images.yaml;
+#                             never matches release-less images such as ceph)
+#   REGISTRY_PREFIX=cloudification
+#   USE_TIMESTAMP=true        append -YYYYmmddHHMMSS to the tag
+#   PUSH_IMAGES=true
 set -euo pipefail
 
-if ! command -v yq &>/dev/null; then
-    echo "ERROR: yq is not installed (brew install yq)" >&2
-    exit 1
-fi
-
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-OPENSTACK_RELEASE="${OPENSTACK_RELEASE:-2025.1}"
-TOOLS_VERSION="${TOOLS_VERSION:-1.0}"
 REGISTRY_PREFIX="${REGISTRY_PREFIX:-cloudification}"
 USE_TIMESTAMP="${USE_TIMESTAMP:-true}"
 PUSH_IMAGES="${PUSH_IMAGES:-true}"
-IMAGES="${IMAGES:-}"
 
 TIMESTAMP=""
 if [[ "$USE_TIMESTAMP" == "true" ]]; then
@@ -20,35 +20,31 @@ if [[ "$USE_TIMESTAMP" == "true" ]]; then
 fi
 
 # Platform detection for Apple Silicon
-DOCKER_BUILD="docker build"
+DOCKER_BUILD=(docker build)
 if [[ $(uname -m) == 'arm64' ]]; then
-    DOCKER_BUILD="docker buildx build --platform linux/amd64"
+    DOCKER_BUILD=(docker buildx build --platform linux/amd64)
 fi
 
-# Read image definitions from shared config
-IMAGE_COUNT=$(yq '.images | length' "$SCRIPT_DIR/images.yaml")
+ROWS=$("$SCRIPT_DIR/matrix.sh")
 BUILT_IMAGES=()
 
-for ((i=0; i<IMAGE_COUNT; i++)); do
-    name=$(yq ".images[$i].name" "$SCRIPT_DIR/images.yaml")
-    dockerfile=$(yq ".images[$i].dockerfile" "$SCRIPT_DIR/images.yaml")
-    context=$(yq ".images[$i].context" "$SCRIPT_DIR/images.yaml")
-    tag_template=$(yq ".images[$i].tag_template" "$SCRIPT_DIR/images.yaml")
-    image_release=$(yq ".images[$i].release // \"$OPENSTACK_RELEASE\"" "$SCRIPT_DIR/images.yaml")
-
-    # Substitute template placeholders
-    tag_prefix=$(echo "$tag_template" | sed "s/{release}/$image_release/g; s/{tools_version}/$TOOLS_VERSION/g")
-
-    # Filter if IMAGES is set
-    if [[ -n "$IMAGES" ]] && ! echo ",$IMAGES," | grep -q ",$name,"; then
-        continue
-    fi
+while IFS= read -r row; do
+    name=$(jq -r '.name' <<<"$row")
+    release=$(jq -r '.release' <<<"$row")
+    dockerfile=$(jq -r '.dockerfile' <<<"$row")
+    context=$(jq -r '.context' <<<"$row")
+    tag_prefix=$(jq -r '.tag_prefix' <<<"$row")
 
     FULL_TAG="${REGISTRY_PREFIX}/${name}:${tag_prefix}${TIMESTAMP}"
-    echo "======== Building: $name → $FULL_TAG"
+    echo "======== Building: $(jq -r '.row_id' <<<"$row") → $FULL_TAG"
 
-    $DOCKER_BUILD \
-        --build-arg OPENSTACK_RELEASE="$image_release" \
+    build_args=()
+    if [[ -n "$release" ]]; then
+        build_args+=(--build-arg "OPENSTACK_RELEASE=$release")
+    fi
+
+    "${DOCKER_BUILD[@]}" \
+        ${build_args[@]+"${build_args[@]}"} \
         -t "$FULL_TAG" \
         -f "$SCRIPT_DIR/$dockerfile" \
         "$SCRIPT_DIR/$context"
@@ -58,7 +54,7 @@ for ((i=0; i<IMAGE_COUNT; i++)); do
     fi
 
     BUILT_IMAGES+=("$FULL_TAG")
-done
+done < <(jq -c '.[]' <<<"$ROWS")
 
 echo ""
 echo "Built images:"

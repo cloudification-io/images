@@ -3,9 +3,9 @@
 ## How to build container
 
 ```shell
-export TOOLS_VERSION="${TOOLS_VERSION:-0.9}" # increment this
-export OPENSTACK_RELEASE=${OPENSTACK_RELEASE:-2024.2}
 export IMAGES="openstack-tools"
 
 bash ../build-local.sh
 ```
+
+Releases and the tools version (`tag_template`) are set in [images.yaml](../images.yaml); set `OPENSTACK_RELEASE` to build a single release. See the [top-level README](../../README.md).

@@ -1,10 +1,22 @@
+# Custom image definitions, consumed by matrix.sh (local builds and CI).
+#
+#   releases:   OpenStack releases to build; one row per release. Required when
+#               {release} appears in tag_template, dockerfile, context or base_image.
+#   base_image: final-stage FROM image; {release} is substituted. The weekly CI
+#               schedule rebuilds a row when this image's digest changed since the
+#               last build. Images without it are never rebuilt by the schedule.
+#
+# ARG OPENSTACK_RELEASE defaults inside the Dockerfiles only matter for bare
+# docker build; matrix.sh always passes the release from this file.
+#
 # OpenStack components — ubuntu_noble base from quay.io/airshipit
 images:
   - name: horizon
     dockerfile: horizon/Dockerfile
     context: horizon
     tag_template: "{release}-ubuntu_noble"
-    release: "2026.1"
+    releases: ["2026.1"]
+    base_image: "quay.io/airshipit/horizon:{release}-ubuntu_noble"
     paths:
       - horizon/
 
@@ -12,6 +24,8 @@ images:
     dockerfile: nova/Dockerfile
     context: nova
     tag_template: "{release}-ubuntu_noble"
+    releases: ["2025.1", "2026.1"]
+    base_image: "quay.io/airshipit/nova:{release}-ubuntu_noble"
     paths:
       - nova/
 
@@ -19,6 +33,8 @@ images:
     dockerfile: octavia/Dockerfile
     context: octavia
     tag_template: "{release}-ubuntu_noble"
+    releases: ["2025.1", "2026.1"]
+    base_image: "quay.io/airshipit/octavia:{release}-ubuntu_noble"
     paths:
       - octavia/
 
@@ -26,6 +42,8 @@ images:
     dockerfile: masakari/Dockerfile
     context: masakari
     tag_template: "{release}-ubuntu_noble"
+    releases: ["2025.1", "2026.1"]
+    base_image: "quay.io/airshipit/masakari:{release}-ubuntu_noble"
     paths:
       - masakari/
 
@@ -33,6 +51,8 @@ images:
     dockerfile: masakari-monitors/Dockerfile
     context: masakari-monitors
     tag_template: "{release}-ubuntu_noble"
+    releases: ["2025.1", "2026.1"]
+    base_image: "quay.io/airshipit/masakari-monitors:{release}-ubuntu_noble"
     paths:
       - masakari-monitors/
 
@@ -40,6 +60,8 @@ images:
     dockerfile: cinder/Dockerfile
     context: cinder
     tag_template: "{release}-ubuntu_noble"
+    releases: ["2025.1", "2026.1"]
+    base_image: "quay.io/airshipit/cinder:{release}-ubuntu_noble"
     paths:
       - cinder/
 
@@ -47,6 +69,8 @@ images:
     dockerfile: glance/Dockerfile
     context: glance
     tag_template: "{release}-ubuntu_noble"
+    releases: ["2025.1", "2026.1"]
+    base_image: "quay.io/airshipit/glance:{release}-ubuntu_noble"
     paths:
       - glance/
 
@@ -54,6 +78,8 @@ images:
     dockerfile: keystone/Dockerfile
     context: keystone
     tag_template: "{release}-ubuntu_noble"
+    releases: ["2025.1", "2026.1"]
+    base_image: "quay.io/airshipit/keystone:{release}-ubuntu_noble"
     paths:
       - keystone/
 
@@ -61,6 +87,8 @@ images:
     dockerfile: neutron/Dockerfile
     context: neutron
     tag_template: "{release}-ubuntu_noble"
+    releases: ["2025.1", "2026.1"]
+    base_image: "quay.io/airshipit/neutron:{release}-ubuntu_noble"
     paths:
       - neutron/
 
@@ -68,7 +96,8 @@ images:
     dockerfile: cloudkitty/Dockerfile
     context: cloudkitty
     tag_template: "{release}-ubuntu_noble"
-    release: "2026.1"
+    releases: ["2026.1"]
+    base_image: "quay.io/airshipit/cloudkitty:{release}-ubuntu_noble"
     paths:
       - cloudkitty/
 
@@ -76,6 +105,8 @@ images:
     dockerfile: designate/Dockerfile
     context: designate
     tag_template: "{release}-ubuntu_noble"
+    releases: ["2025.1", "2026.1"]
+    base_image: "quay.io/airshipit/designate:{release}-ubuntu_noble"
     paths:
       - designate/
 
@@ -83,6 +114,8 @@ images:
     dockerfile: barbican/Dockerfile
     context: barbican
     tag_template: "{release}-ubuntu_noble"
+    releases: ["2025.1", "2026.1"]
+    base_image: "quay.io/airshipit/barbican:{release}-ubuntu_noble"
     paths:
       - barbican/
 
@@ -90,6 +123,8 @@ images:
     dockerfile: heat/Dockerfile
     context: heat
     tag_template: "{release}-ubuntu_noble"
+    releases: ["2025.1", "2026.1"]
+    base_image: "quay.io/airshipit/heat:{release}-ubuntu_noble"
     paths:
       - heat/
 
@@ -97,6 +132,8 @@ images:
     dockerfile: placement/Dockerfile
     context: placement
     tag_template: "{release}-ubuntu_noble"
+    releases: ["2025.1", "2026.1"]
+    base_image: "quay.io/airshipit/placement:{release}-ubuntu_noble"
     paths:
       - placement/
 
@@ -104,6 +141,8 @@ images:
     dockerfile: manila/Dockerfile
     context: manila
     tag_template: "{release}-ubuntu_noble"
+    releases: ["2025.1", "2026.1"]
+    base_image: "quay.io/airshipit/manila:{release}-ubuntu_noble"
     paths:
       - manila/
 
@@ -111,6 +150,8 @@ images:
     dockerfile: libvirt/Dockerfile
     context: libvirt
     tag_template: "{release}-ubuntu_noble"
+    releases: ["2025.1", "2026.1"]
+    base_image: "quay.io/airshipit/libvirt:{release}-ubuntu_noble"
     paths:
       - libvirt/
 
@@ -119,6 +160,7 @@ images:
     dockerfile: openvswitch/Dockerfile
     context: openvswitch
     tag_template: "latest-ubuntu_noble"
+    base_image: "quay.io/airshipit/openvswitch:latest-ubuntu_noble"
     paths:
       - openvswitch/
 
@@ -127,7 +169,8 @@ images:
     dockerfile: gnocchi-api/Dockerfile
     context: gnocchi-api
     tag_template: "{release}-ubuntu-noble"
-    release: "2026.1"
+    releases: ["2026.1"]
+    base_image: "quay.io/openstack.kolla/gnocchi-api:{release}-ubuntu-noble"
     paths:
       - gnocchi-api/
 
@@ -135,15 +178,18 @@ images:
     dockerfile: gnocchi-metricd/Dockerfile
     context: gnocchi-metricd
     tag_template: "{release}-ubuntu-noble"
-    release: "2026.1"
+    releases: ["2026.1"]
+    base_image: "quay.io/openstack.kolla/gnocchi-metricd:{release}-ubuntu-noble"
     paths:
       - gnocchi-metricd/
 
-  # Standalone builds — different base images and versioning
+  # Standalone builds — different base images and versioning; bump the tools version here
   - name: openstack-tools
     dockerfile: openstack-tools/Dockerfile
     context: openstack-tools
-    tag_template: "{tools_version}-{release}"
+    tag_template: "1.0-{release}"
+    releases: ["2025.1", "2026.1"]
+    base_image: "docker.io/library/ubuntu:24.04"
     paths:
       - openstack-tools/
 
@@ -152,12 +198,14 @@ images:
     dockerfile: sbom-discovery/Dockerfile
     context: sbom-discovery
     tag_template: "1.0"
+    base_image: "docker.io/library/alpine:3.24"
     paths:
       - sbom-discovery/
 
-  - name: ceph 
+  - name: ceph
     dockerfile: ceph/Dockerfile
     context: ceph
     tag_template: "v19.2.2"
+    base_image: "quay.io/ceph/ceph:v19.2.2"
     paths:
       - ceph/
