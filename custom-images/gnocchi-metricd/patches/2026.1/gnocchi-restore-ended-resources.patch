@@ -1,0 +1,114 @@
+From 6b64b71636cad76b5085d55998e12a01eea9b432 Mon Sep 17 00:00:00 2001
+From: Vladislav Gusev <vlad.esten@gmail.com>
+Date: Thu, 8 Oct 2026 19:16:58 +0300
+Subject: [PATCH] fix(storage): restore ended resources only with
+ metric_inactive_after
+
+- skip clearing ended_at on new measures unless metric_inactive_after > 0
+- document the restore under the metric_inactive_after option
+---
+ gnocchi/opts.py               |  5 ++++-
+ gnocchi/storage/__init__.py   |  9 ++++++++-
+ gnocchi/tests/test_storage.py | 21 +++++++++++++++++++++
+ 3 files changed, 33 insertions(+), 2 deletions(-)
+
+diff --git a/gnocchi/opts.py b/gnocchi/opts.py
+index 6ae72a59..76cb6ebc 100644
+--- a/gnocchi/opts.py
++++ b/gnocchi/opts.py
+@@ -169,7 +169,10 @@ def list_opts():
+                             "that has not received new measurements for a "
+                             "given period. If all metrics of a resource are "
+                             "inactive, we mark the resource with the "
+-                            "'ended_at' timestamp. The default is 0 (zero), "
++                            "'ended_at' timestamp. Only when activated, a "
++                            "resource with an 'ended_at' timestamp is restored "
++                            "once it receives a measure at or after that "
++                            "timestamp. The default is 0 (zero), "
+                             "which means that we never execute process."),
+             cfg.IntOpt('resource_cleanup_after',
+                        default=0,
+diff --git a/gnocchi/storage/__init__.py b/gnocchi/storage/__init__.py
+index f18efa5f..ffd822fa 100644
+--- a/gnocchi/storage/__init__.py
++++ b/gnocchi/storage/__init__.py
+@@ -98,8 +98,10 @@ class MetricAlreadyExists(StorageError):
+ @utils.retry_on_exception_and_log("Unable to initialize storage driver")
+ def get_driver(conf):
+     """Return the configured driver."""
+-    return utils.get_driver_class('gnocchi.storage', conf.storage)(
++    driver = utils.get_driver_class('gnocchi.storage', conf.storage)(
+         conf.storage)
++    driver.restore_ended_resources = conf.metricd.metric_inactive_after > 0
++    return driver
+ 
+ 
+ class Statistics(collections.defaultdict):
+@@ -129,6 +131,9 @@ class StorageDriver(object):
+     # threads by setting this to utils.sequencial_map
+     MAP_METHOD = staticmethod(utils.parallel_map)
+ 
++    # Restoring only undoes the metric_inactive_after normalization.
++    restore_ended_resources = False
++
+     def __init__(self, conf):
+         self.statistics = Statistics()
+ 
+@@ -702,6 +707,8 @@ class StorageDriver(object):
+         indexer_driver.update_last_measure_timestamp(metric.id)
+         resource_id = metric.resource_id
+         if resource_id:
++            if not self.restore_ended_resources:
++                return
+             # We can receive multiple measures for the same metric in different timestamps to process.
+             latest_timestamp_in_measurements = self.get_latest_timestmap_of_measures(measures)
+ 
+diff --git a/gnocchi/tests/test_storage.py b/gnocchi/tests/test_storage.py
+index 6ba06a95..24ecb94c 100644
+--- a/gnocchi/tests/test_storage.py
++++ b/gnocchi/tests/test_storage.py
+@@ -1338,6 +1338,7 @@ class TestStorageDriver(tests_base.TestCase):
+             self.assertEquals(1, log_mock.debug.call_count)
+ 
+     def test_execute_metadata_updates_if_needed_resource_recover(self):
++        self.storage.restore_ended_resources = True
+         measures = {"timestamps": [numpy.datetime64('1979-01-01T00:00:00'), numpy.datetime64('2030-01-01T00:00:00'),
+                                    numpy.datetime64('1973-01-01T00:00:00')]}
+ 
+@@ -1379,6 +1380,7 @@ class TestStorageDriver(tests_base.TestCase):
+             self.assertEquals(1, log_mock.debug.call_count)
+ 
+     def test_execute_metadata_updates_if_needed_resource_no_recover(self):
++        self.storage.restore_ended_resources = True
+         measures = {"timestamps": [numpy.datetime64('1979-01-01T00:00:00'), numpy.datetime64('2022-01-01T00:00:00'),
+                                    numpy.datetime64('1973-01-01T00:00:00')]}
+ 
+@@ -1421,6 +1423,25 @@ class TestStorageDriver(tests_base.TestCase):
+             self.assertEquals(1, log_mock.info.call_count)
+             self.assertEquals(1, log_mock.debug.call_count)
+ 
++    def test_execute_metadata_updates_if_needed_resource_restore_disabled(self):
++        measures = {"timestamps": [numpy.datetime64('2030-01-01T00:00:00')]}
++
++        indexer_driver_mock = mock.Mock()
++        metric_mock = mock.Mock()
++        metric_mock.needs_raw_data_truncation = False
++        metric_mock.resource_id = 1
++
++        self.storage.execute_metadata_updates_if_needed(indexer_driver_mock, measures, metric_mock)
++
++        self.assertEqual(1, indexer_driver_mock.update_last_measure_timestamp.call_count)
++        self.assertEqual(0, indexer_driver_mock.get_resource.call_count)
++        self.assertEqual(0, indexer_driver_mock.update_resource.call_count)
++
++    def test_get_driver_restore_ended_resources(self):
++        self.assertFalse(storage.get_driver(self.conf).restore_ended_resources)
++        self.conf.set_override('metric_inactive_after', 3600, 'metricd')
++        self.assertTrue(storage.get_driver(self.conf).restore_ended_resources)
++
+     def test_add_measures_to_metrics(self):
+         raw_measures_mock = mock.Mock()
+ 
+-- 
+2.54.0 (Apple Git-157)
+
