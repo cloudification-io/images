@@ -1,0 +1,9 @@
+{
+  "image": "keystone",
+  "tag": "2026.1-ubuntu_noble-20261012103000",
+  "digest": "sha256:fae27540b767741d46ccbff1273999df8fb543972457387a5aa2508732068824",
+  "image_reference": "ghcr.io/cloudification-io/keystone@sha256:fae27540b767741d46ccbff1273999df8fb543972457387a5aa2508732068824",
+  "generated_at": "2026-10-12T10:31:01.872340+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 1
+}
