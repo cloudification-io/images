@@ -1,0 +1,9 @@
+{
+  "image": "openvswitch",
+  "tag": "latest-ubuntu_noble-20261019083952",
+  "digest": "sha256:8df5066f19b73d9a9a85ce2b1b21da67d25923a3c8d4e89e41e51abf3abc6e61",
+  "image_reference": "ghcr.io/cloudification-io/openvswitch@sha256:8df5066f19b73d9a9a85ce2b1b21da67d25923a3c8d4e89e41e51abf3abc6e61",
+  "generated_at": "2026-10-19T08:40:19.788029+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}
