@@ -29,7 +29,9 @@ RUN apt autoclean && apt autopurge && \
 RUN mkdir -p /etc/bash_completion.d && \
     wget https://raw.githubusercontent.com/junegunn/fzf/$fzf_completion_version/shell/completion.bash -O /etc/bash_completion.d/fzf.bash_completion && \
     wget https://raw.githubusercontent.com/openstack/python-novaclient/$openstack_release/tools/nova.bash_completion -O /etc/bash_completion.d/nova.bash_completion
-RUN pip3 install --break-system-packages -c https://raw.githubusercontent.com/openstack/requirements/$openstack_release/upper-constraints.txt \
+# a pip-managed setuptools; the Debian copy in /usr/lib/python3/dist-packages satisfies pip but not uv pip check
+RUN pip3 install --break-system-packages --upgrade setuptools && \
+    pip3 install --break-system-packages -c https://raw.githubusercontent.com/openstack/requirements/$openstack_release/upper-constraints.txt \
         python-openstackclient python-octaviaclient python-neutronclient \
         openstack-placement osc-placement networking-l2gw osprofiler \
         python-barbicanclient gnocchiclient python-cloudkittyclient \
