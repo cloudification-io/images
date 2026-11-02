@@ -1,0 +1,68 @@
+name: Trivy report
+description: Scan an image with Trivy and upload the HTML report with its metadata as a workflow artifact
+
+inputs:
+  name:
+    description: Image name; the report is filed under it on the report site
+    required: true
+  tag:
+    description: Tag the report is filed under
+    required: true
+  image-ref:
+    description: Image reference to scan, pinned by digest
+    required: true
+  digest:
+    description: Manifest digest of the scanned image
+    required: true
+  artifact-name:
+    description: Artifact name; publish-trivy-reports.yml collects every trivy-report-* artifact
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Prepare report directory
+      shell: bash
+      env:
+        IMAGE_NAME: ${{ inputs.name }}
+      run: mkdir -p "trivy-reports/$IMAGE_NAME"
+
+    - name: Scan image with Trivy
+      uses: aquasecurity/trivy-action@v0.36.0
+      with:
+        image-ref: ${{ inputs.image-ref }}
+        format: json
+        output: trivy-reports/${{ inputs.name }}/report.json
+        scanners: vuln
+
+    - name: Generate interactive report
+      shell: bash
+      env:
+        IMAGE_NAME: ${{ inputs.name }}
+      run: |
+        trivy plugin install scan2html
+        trivy scan2html generate \
+          --scan2html-flags \
+          --output "trivy-reports/$IMAGE_NAME/index.html" \
+          --from "trivy-reports/$IMAGE_NAME/report.json"
+
+    - name: Generate report metadata
+      shell: bash
+      env:
+        IMAGE_NAME: ${{ inputs.name }}
+        IMAGE_TAG: ${{ inputs.tag }}
+        IMAGE_DIGEST: ${{ inputs.digest }}
+        IMAGE_REF: ${{ inputs.image-ref }}
+      run: |
+        python3 .github/scripts/create_trivy_metadata.py \
+          --report-dir "trivy-reports/$IMAGE_NAME" \
+          --image "$IMAGE_NAME" \
+          --tag "$IMAGE_TAG" \
+          --digest "$IMAGE_DIGEST" \
+          --image-reference "$IMAGE_REF"
+
+    - name: Upload report
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: trivy-reports/${{ inputs.name }}

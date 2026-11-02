@@ -1,0 +1,73 @@
+name: Publish Trivy reports
+
+# Called by build-images.yml and mirror-upstream.yml after their scans: collects
+# every trivy-report-* artifact of the run and commits the site to gh-pages.
+# Runs even when some scans failed, so the reports that exist still get published.
+on:
+  workflow_call:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    concurrency:
+      group: publish-trivy-reports
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Download Trivy reports
+        uses: actions/download-artifact@v8
+        with:
+          pattern: trivy-report-*
+          path: trivy-reports
+
+      - name: Check for reports
+        id: reports
+        run: |
+          if [ -n "$(find trivy-reports -name metadata.json -print -quit 2>/dev/null)" ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No Trivy reports in this run, nothing to publish."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout GitHub Pages branch
+        if: steps.reports.outputs.found == 'true'
+        uses: actions/checkout@v7
+        with:
+          ref: gh-pages
+          path: site
+          fetch-depth: 1
+
+      - name: Prepare GitHub Pages content
+        if: steps.reports.outputs.found == 'true'
+        run: |
+          # report groups of images or tags no longer built or mirrored are removed
+          {
+            custom-images/matrix.sh | jq -r '.[] | "\(.name) \(.tag_prefix)"'
+            ./mirror-matrix.sh | jq -r '.[] | "\(.name) \(.tag)"'
+          } > live-tags.txt
+          python3 .github/scripts/publish-trivy-reports.py \
+            --input-dir trivy-reports \
+            --site-dir site \
+            --keep 10 \
+            --live-tags live-tags.txt
+
+      - name: Commit GitHub Pages changes
+        if: steps.reports.outputs.found == 'true'
+        working-directory: site
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add --all
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "Update Trivy reports"
+          git push origin HEAD:gh-pages
