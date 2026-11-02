@@ -1,0 +1,9 @@
+{
+  "image": "gnocchi-statsd",
+  "tag": "2026.1-ubuntu-noble-20261102143113",
+  "digest": "sha256:81d924add25b73edfd37bf0a15c7f0d6c8b5a8ee8bc4aeb0443a8b5d1b696b2b",
+  "image_reference": "ghcr.io/cloudification-io/gnocchi-statsd@sha256:81d924add25b73edfd37bf0a15c7f0d6c8b5a8ee8bc4aeb0443a8b5d1b696b2b",
+  "generated_at": "2026-11-02T14:32:02.673050+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}

@@ -1,0 +1,9 @@
+{
+  "image": "designate",
+  "tag": "2025.1-ubuntu_noble-20261102143004",
+  "digest": "sha256:3fd6bf210ad50b342c0ee34b07f356064eed5b736e3b4fee7736d251986f7802",
+  "image_reference": "ghcr.io/cloudification-io/designate@sha256:3fd6bf210ad50b342c0ee34b07f356064eed5b736e3b4fee7736d251986f7802",
+  "generated_at": "2026-11-02T14:30:28.376576+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}
