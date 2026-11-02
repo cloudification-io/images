@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM ubuntu:24.04
 
 ENV LC_ALL=C.UTF-8
@@ -35,3 +36,7 @@ RUN pip3 install --break-system-packages -c https://raw.githubusercontent.com/op
         python-masakariclient \
         python-designateclient python-manilaclient python-heatclient && \
     openstack complete > /etc/bash_completion.d/osc.bash_completion
+
+RUN --mount=from=uv,source=/uv,target=/usr/local/bin/uv \
+    --mount=from=overrides,target=/overrides \
+    /overrides/apply.sh "$OPENSTACK_RELEASE"

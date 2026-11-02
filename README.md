@@ -4,6 +4,14 @@
 
 [images.yaml](custom-images/images.yaml) lists every image with the OpenStack releases it is built for (`releases`) and its upstream base image (`base_image`). One image is built per (image, release) pair, so adding a release means appending it to the relevant `releases` lists. `custom-images/matrix.sh` expands the file into build rows and is used by both the local script and CI.
 
+## Python package overrides
+
+[custom-images/overrides/](custom-images/overrides/) holds one requirements-style file per release (`2026.1.txt`, ...) with `name==version` pins that fix CVEs in third-party Python packages, one comment per pin saying why. Upstream `openstack/requirements` freezes those versions per release and does not bump them on stable branches (see the warning at the top of `upper-constraints.txt`), so a pin here is the lasting fix for that release, not a stopgap.
+
+Every image with a Python environment runs `overrides/apply.sh` in its final stage with `uv` bind-mounted, so a pin is a one-file change and the image gains only the replaced package. A pin equal to the installed version is skipped. A pin older than what the base image ships fails the build, which is how a redundant pin gets noticed and dropped. `name>=version` is for packages the base image upgrades on its own, such as pip: a newer installed version is left alone. Only pure-Python wheels belong there; packages that need a compiler go through the `venv_builder` stage.
+
+The `overrides` directory and the pinned `uv` image are named build contexts, declared once under `build_contexts` in `images.yaml` and passed by both `build-local.sh` and CI.
+
 ## Building images locally
 
 Builds every listed release of every image and pushes the result:

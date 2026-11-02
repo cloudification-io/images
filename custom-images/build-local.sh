@@ -42,6 +42,10 @@ while IFS= read -r row; do
     if [[ -n "$release" ]]; then
         build_args+=(--build-arg "OPENSTACK_RELEASE=$release")
     fi
+    while IFS= read -r bc; do
+        [[ "$bc" == *://* ]] || bc="${bc%%=*}=$SCRIPT_DIR/${bc#*=}"
+        build_args+=(--build-context "$bc")
+    done < <(jq -r '.build_contexts[]' <<<"$row")
 
     "${DOCKER_BUILD[@]}" \
         ${build_args[@]+"${build_args[@]}"} \

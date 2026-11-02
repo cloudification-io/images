@@ -2,7 +2,8 @@
 # Expand custom-images/images.yaml into build rows, one per (image, release).
 #
 # Prints a JSON array; each row has name, release, row_id, dockerfile, context,
-# tag_prefix, base_image, paths. Paths are relative to custom-images/.
+# tag_prefix, base_image, paths, build_contexts. Paths are relative to custom-images/;
+# build_contexts are "name=source" strings, directory sources relative to custom-images/.
 #
 #   IMAGES=nova,keystone      only these image names (empty = all)
 #   OPENSTACK_RELEASE=2026.1  only this release (empty = all; never matches release-less images)
@@ -19,12 +20,13 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 IMAGES="${IMAGES:-}"
 OPENSTACK_RELEASE="${OPENSTACK_RELEASE:-}"
 
-ROWS=$(yq -o=json '.images' "$SCRIPT_DIR/images.yaml" | jq -c \
+ROWS=$(yq -o=json '.' "$SCRIPT_DIR/images.yaml" | jq -c \
     --arg images "$IMAGES" \
     --arg release "$OPENSTACK_RELEASE" '
 def subst($rel): gsub("\\{release\\}"; $rel);
 def has_release_ph: test("\\{release\\}");
-[ .[]
+((.build_contexts // {}) | to_entries | map("\(.key)=\(.value)")) as $build_contexts
+| [ .images[]
   | (.name // error("image without name")) as $name
   | ([.tag_template, .dockerfile, .context, (.base_image // "")] | map(has_release_ph) | any) as $needs
   | (.releases // []) as $rels
@@ -40,7 +42,7 @@ def has_release_ph: test("\\{release\\}");
       dockerfile: (.dockerfile | subst($rel)), context: (.context | subst($rel)),
       tag_prefix: (.tag_template | subst($rel)),
       base_image: ((.base_image // "") | subst($rel)),
-      paths: (.paths // []) } ]
+      paths: (.paths // []), build_contexts: $build_contexts } ]
 | (group_by(.row_id) | map(select(length > 1) | .[0].row_id)) as $dups
 | if ($dups | length) > 0 then error("duplicate row ids: \($dups | join(", "))") else . end
 | map(select($images == "" or (.name as $n | $images | split(",") | map(gsub("\\s";"")) | index($n) != null)))
