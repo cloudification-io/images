@@ -6,13 +6,13 @@
 #                             never matches release-less images such as ceph)
 #   REGISTRY_PREFIX=cloudification
 #   USE_TIMESTAMP=true        append -YYYYmmddHHMMSS to the tag
-#   PUSH_IMAGES=true
+#   PUSH_IMAGES=true         push after building (default: false; CI publishes)
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REGISTRY_PREFIX="${REGISTRY_PREFIX:-cloudification}"
 USE_TIMESTAMP="${USE_TIMESTAMP:-true}"
-PUSH_IMAGES="${PUSH_IMAGES:-true}"
+PUSH_IMAGES="${PUSH_IMAGES:-false}"
 
 TIMESTAMP=""
 if [[ "$USE_TIMESTAMP" == "true" ]]; then
