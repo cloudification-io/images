@@ -1,0 +1,9 @@
+{
+  "image": "placement",
+  "tag": "2026.1-ubuntu_noble-20261102134924",
+  "digest": "sha256:5f50d58a4a258ca4c4fff94baefeee8f829ee9ebb1bd2554028f81232742fe5f",
+  "image_reference": "ghcr.io/cloudification-io/placement@sha256:5f50d58a4a258ca4c4fff94baefeee8f829ee9ebb1bd2554028f81232742fe5f",
+  "generated_at": "2026-11-02T13:49:54.382311+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}
