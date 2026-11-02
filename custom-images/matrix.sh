@@ -2,8 +2,9 @@
 # Expand custom-images/images.yaml into build rows, one per (image, release).
 #
 # Prints a JSON array; each row has name, release, row_id, dockerfile, context,
-# tag_prefix, base_image, paths, build_contexts. Paths are relative to custom-images/;
-# build_contexts are "name=source" strings, directory sources relative to custom-images/.
+# tag_prefix, base_image, paths, build_contexts, build_args. Paths are relative to
+# custom-images/; build_contexts are "name=source" strings, directory sources relative
+# to custom-images/; build_args are "NAME=value" strings.
 #
 #   IMAGES=nova,keystone      only these image names (empty = all)
 #   OPENSTACK_RELEASE=2026.1  only this release (empty = all; never matches release-less images)
@@ -42,7 +43,8 @@ def has_release_ph: test("\\{release\\}");
       dockerfile: (.dockerfile | subst($rel)), context: (.context | subst($rel)),
       tag_prefix: (.tag_template | subst($rel)),
       base_image: ((.base_image // "") | subst($rel)),
-      paths: (.paths // []), build_contexts: $build_contexts } ]
+      paths: (.paths // []), build_contexts: $build_contexts,
+      build_args: ((.build_args // {}) | to_entries | map("\(.key)=\(.value)")) } ]
 | (group_by(.row_id) | map(select(length > 1) | .[0].row_id)) as $dups
 | if ($dups | length) > 0 then error("duplicate row ids: \($dups | join(", "))") else . end
 | map(select($images == "" or (.name as $n | $images | split(",") | map(gsub("\\s";"")) | index($n) != null)))
@@ -62,21 +64,34 @@ final_from_image() {
     ' "$1"
 }
 
-# base_image must be the final-stage FROM image of the row's Dockerfile
+# base_image must be the final-stage FROM image of the row's Dockerfile; a Dockerfile
+# with FROM ${BASE_IMAGE} gets it as a build arg instead
+BASE_ARG_ROWS=()
 while IFS=$'\t' read -r row_id dockerfile base_image; do
     [[ -n "$base_image" ]] || continue
     if [[ ! -f "$SCRIPT_DIR/$dockerfile" ]]; then
         echo "ERROR: $row_id: dockerfile $dockerfile does not exist" >&2
         exit 1
     fi
+    from_image=$(final_from_image "$SCRIPT_DIR/$dockerfile")
+    if [[ "$from_image" == '${BASE_IMAGE}' ]]; then
+        BASE_ARG_ROWS+=("$row_id")
+        continue
+    fi
     repo=${base_image%%:*}
     repo=${repo#docker.io/library/}
     repo=${repo#docker.io/}
-    from_image=$(final_from_image "$SCRIPT_DIR/$dockerfile")
     if [[ "${from_image%%[:@]*}" != "$repo" ]]; then
         echo "ERROR: $row_id: base_image repository '$repo' is not the final FROM image ('$from_image') in $dockerfile" >&2
         exit 1
     fi
 done < <(jq -r '.[] | [.row_id, .dockerfile, .base_image] | @tsv' <<<"$ROWS")
+
+if [[ ${#BASE_ARG_ROWS[@]} -gt 0 ]]; then
+    ROWS=$(jq -c --arg ids "${BASE_ARG_ROWS[*]}" '
+        ($ids | split(" ")) as $ids
+        | map(if .row_id as $r | $ids | index($r) then .build_args = ["BASE_IMAGE=\(.base_image)"] + .build_args else . end)
+    ' <<<"$ROWS")
+fi
 
 echo "$ROWS"

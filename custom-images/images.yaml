@@ -5,6 +5,8 @@
 #   base_image: final-stage FROM image; {release} is substituted. The weekly CI
 #               schedule rebuilds a row when this image's digest changed since the
 #               last build. Images without it are never rebuilt by the schedule.
+#               A Dockerfile whose final FROM is ${BASE_IMAGE} receives it as a build arg.
+#   build_args: extra --build-arg values for the row.
 #
 # ARG OPENSTACK_RELEASE defaults inside the Dockerfiles only matter for bare
 # docker build; matrix.sh always passes the release from this file.
@@ -205,6 +207,74 @@ images:
     base_image: "quay.io/openstack.kolla/gnocchi-metricd:{release}-ubuntu-noble"
     paths:
       - gnocchi-metricd/
+      - overrides/
+
+  # Kolla service images taken as-is apart from the Python pin overrides and the
+  # removal of the build toolchain, via overlay/Dockerfile
+  - name: designate-backend-bind9
+    dockerfile: overlay/Dockerfile
+    context: overlay
+    tag_template: "{release}-ubuntu-noble"
+    releases: ["2025.1", "2026.1"]
+    base_image: "quay.io/openstack.kolla/designate-backend-bind9:{release}-ubuntu-noble"
+    paths:
+      - overlay/
+      - overrides/
+
+  - name: ceilometer-central
+    dockerfile: overlay/Dockerfile
+    context: overlay
+    tag_template: "{release}-ubuntu-noble"
+    releases: ["2026.1"]
+    base_image: "quay.io/openstack.kolla/ceilometer-central:{release}-ubuntu-noble"
+    build_args:
+      RUN_USER: ceilometer
+    paths:
+      - overlay/
+      - overrides/
+
+  - name: ceilometer-compute
+    dockerfile: overlay/Dockerfile
+    context: overlay
+    tag_template: "{release}-ubuntu-noble"
+    releases: ["2026.1"]
+    base_image: "quay.io/openstack.kolla/ceilometer-compute:{release}-ubuntu-noble"
+    paths:
+      - overlay/
+      - overrides/
+
+  - name: ceilometer-notification
+    dockerfile: overlay/Dockerfile
+    context: overlay
+    tag_template: "{release}-ubuntu-noble"
+    releases: ["2026.1"]
+    base_image: "quay.io/openstack.kolla/ceilometer-notification:{release}-ubuntu-noble"
+    build_args:
+      RUN_USER: ceilometer
+    paths:
+      - overlay/
+      - overrides/
+
+  - name: gnocchi-base
+    dockerfile: overlay/Dockerfile
+    context: overlay
+    tag_template: "{release}-ubuntu-noble"
+    releases: ["2026.1"]
+    base_image: "quay.io/openstack.kolla/gnocchi-base:{release}-ubuntu-noble"
+    paths:
+      - overlay/
+      - overrides/
+
+  - name: gnocchi-statsd
+    dockerfile: overlay/Dockerfile
+    context: overlay
+    tag_template: "{release}-ubuntu-noble"
+    releases: ["2026.1"]
+    base_image: "quay.io/openstack.kolla/gnocchi-statsd:{release}-ubuntu-noble"
+    build_args:
+      RUN_USER: gnocchi
+    paths:
+      - overlay/
       - overrides/
 
   # Standalone builds — different base images and versioning; bump the tools version here

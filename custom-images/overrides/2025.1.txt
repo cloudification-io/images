@@ -6,3 +6,7 @@
 
 # CVE-2026-102268; the upstream stable bump (requirements change 1012461) was refused
 PyJWT==2.14.0
+
+# GHSA-6q48-6c7w-9gw2; pip ships its own copy of certifi, fixed from 26.2.2
+certifi==2026.10.18
+pip>=26.2.2
