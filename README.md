@@ -4,6 +4,8 @@
 
 [images.yaml](custom-images/images.yaml) lists every image with the OpenStack releases it is built for (`releases`) and its upstream base image (`base_image`). One image is built per (image, release) pair, so adding a release means appending it to the relevant `releases` lists. `custom-images/matrix.sh` expands the file into build rows and is used by both the local script and CI.
 
+Kolla service images that need no change beyond the Python pin overrides and the removal of the build toolchain are built from the shared [overlay/Dockerfile](custom-images/overlay/Dockerfile): the row's `base_image` is passed as the `BASE_IMAGE` build arg and `build_args` supplies `RUN_USER` where the upstream image does not run as root.
+
 ## Python package overrides
 
 [custom-images/overrides/](custom-images/overrides/) holds one requirements-style file per release (`2026.1.txt`, ...) with `name==version` pins that fix CVEs in third-party Python packages, one comment per pin saying why. Upstream `openstack/requirements` freezes those versions per release and does not bump them on stable branches (see the warning at the top of `upper-constraints.txt`), so a pin here is the lasting fix for that release, not a stopgap.

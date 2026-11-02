@@ -101,7 +101,8 @@ jobs:
           ROWS=$(echo "$ROWS" | jq -c '[.[] |
             .dockerfile |= ("custom-images/" + .) |
             .context |= ("custom-images/" + .) |
-            .build_contexts |= (map(if test("://") then . else sub("="; "=custom-images/") end) | join("\n"))]')
+            .build_contexts |= (map(if test("://") then . else sub("="; "=custom-images/") end) | join("\n")) |
+            .build_args |= join("\n")]')
 
           # Filter by changed paths on push events
           if [ "$EVENT" = "push" ]; then
@@ -248,6 +249,7 @@ jobs:
           build-args: |
             ${{ matrix.release && format('OPENSTACK_RELEASE={0}', matrix.release) || '' }}
             CACHE_BUST=${{ github.run_id }}-${{ github.run_attempt }}
+            ${{ matrix.build_args }}
           build-contexts: ${{ matrix.build_contexts }}
           cache-from: type=gha,scope=${{ matrix.row_id }}
           cache-to: type=gha,mode=max,scope=${{ matrix.row_id }}

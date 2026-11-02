@@ -46,6 +46,9 @@ while IFS= read -r row; do
         [[ "$bc" == *://* ]] || bc="${bc%%=*}=$SCRIPT_DIR/${bc#*=}"
         build_args+=(--build-context "$bc")
     done < <(jq -r '.build_contexts[]' <<<"$row")
+    while IFS= read -r arg; do
+        build_args+=(--build-arg "$arg")
+    done < <(jq -r '.build_args[]' <<<"$row")
 
     "${DOCKER_BUILD[@]}" \
         ${build_args[@]+"${build_args[@]}"} \
