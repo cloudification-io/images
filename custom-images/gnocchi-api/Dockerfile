@@ -3,7 +3,13 @@ ARG BASE_TAG=${OPENSTACK_RELEASE}-ubuntu-noble
 
 FROM quay.io/openstack.kolla/gnocchi-api:${BASE_TAG}
 
-RUN pip install uwsgi "numpy>=2.3.2,<3"
+ARG PYJWT_VERSION=2.14.0
+
+RUN /var/lib/kolla/venv/bin/python -m pip install \
+        --no-cache-dir uwsgi "numpy>=2.3.2,<3" \
+    && /var/lib/kolla/venv/bin/python -m pip install \
+        --no-cache-dir --no-deps "PyJWT==${PYJWT_VERSION}" \
+    && /var/lib/kolla/venv/bin/python -m pip check
 
 ARG OPENSTACK_RELEASE
 COPY patches/${OPENSTACK_RELEASE}/gnocchi-restore-ended-resources.patch /tmp/gnocchi-restore-ended-resources.patch
