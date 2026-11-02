@@ -44,8 +44,20 @@ jobs:
     permissions:
       contents: read
       packages: write
+    outputs:
+      matrix: ${{ steps.matrix.outputs.result }}
+      has_images: ${{ steps.matrix.outputs.has_images }}
     steps:
       - uses: actions/checkout@v7
+
+      - name: Mirror matrix
+        id: matrix
+        env:
+          IMAGES: ${{ inputs.images }}
+        run: |
+          ROWS=$(./mirror-matrix.sh)
+          echo "result=$(jq -c '{include: .}' <<<"$ROWS")" >> "$GITHUB_OUTPUT"
+          echo "has_images=$(jq 'length > 0' <<<"$ROWS")" >> "$GITHUB_OUTPUT"
 
       - name: Install skopeo
         run: sudo apt-get update && sudo apt-get install -y skopeo
@@ -68,6 +80,56 @@ jobs:
           SUFFIX: ${{ steps.suffix.outputs.value }}
           FORCE: ${{ inputs.force }}
         run: ./mirror-to-ghcr.sh
+
+  scan:
+    name: Scan mirrored images
+    needs: mirror
+    if: >-
+      ${{ !cancelled() &&
+          contains(fromJson('["success", "failure"]'), needs.mirror.result) &&
+          needs.mirror.outputs.has_images == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.mirror.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Log in to ghcr.io
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: skopeo login ghcr.io -u "$GHCR_USER" --password-stdin <<< "$GHCR_TOKEN"
+
+      - name: Resolve image digest
+        id: digest
+        env:
+          IMAGE: ${{ env.IMAGE_PREFIX }}/${{ matrix.name }}:${{ matrix.tag }}
+        run: |
+          DIGEST=$(skopeo inspect --raw --retry-times 3 "docker://$IMAGE" | skopeo manifest-digest /dev/stdin)
+          echo "value=$DIGEST" >> "$GITHUB_OUTPUT"
+          echo "$IMAGE@$DIGEST"
+
+      - name: Trivy report
+        uses: ./.github/actions/trivy-report
+        with:
+          name: ${{ matrix.name }}
+          tag: ${{ matrix.tag }}
+          image-ref: ${{ env.IMAGE_PREFIX }}/${{ matrix.name }}@${{ steps.digest.outputs.value }}
+          digest: ${{ steps.digest.outputs.value }}
+          artifact-name: trivy-report-${{ matrix.name }}-${{ matrix.tag }}
+
+  publish-reports:
+    needs: scan
+    # a failed scan row must not hold back the reports the other rows uploaded
+    if: ${{ !cancelled() && contains(fromJson('["success", "failure"]'), needs.scan.result) }}
+    permissions:
+      contents: write
+    uses: ./.github/workflows/publish-trivy-reports.yml
 
   mirror-to-dockerhub:
     name: Mirror images to Docker Hub

@@ -26,13 +26,11 @@ set -euo pipefail
 #   FORCE          true/false                   (default: false)
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CONFIG="$SCRIPT_DIR/mirror-images.yaml"
 IMAGE_PREFIX="${IMAGE_PREFIX:-ghcr.io/cloudification-io}"
 DRY_RUN="${DRY_RUN:-false}"
 IMAGES="${IMAGES:-}"
 SUFFIX="${SUFFIX:-}"
 FORCE="${FORCE:-false}"
-
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -49,7 +47,6 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-
 for cmd in skopeo yq jq; do
     if ! command -v "$cmd" &>/dev/null; then
         echo "ERROR: $cmd is not installed" >&2
@@ -60,36 +57,7 @@ done
 # shellcheck source=mirror-lib.sh
 source "$SCRIPT_DIR/mirror-lib.sh"
 
-MATRIX=$(yq -o=json '.images' "$CONFIG" | jq -c '
-def has_release_ph: test("\\{release\\}");
-{
-  "include": [.[] | . as $img
-    | ($img.name // error("image without name")) as $name
-    | ($img.releases // []) as $rels
-    | ([$img.tags[] | .tag, (.alias // "")] | map(has_release_ph) | any) as $needs
-    | if ($rels | type) != "array" or ($rels | any(type != "string" or . == "")) then
-        error("\($name): releases must be a list of non-empty quoted strings") else . end
-    | if $needs and ($rels | length) == 0 then
-        error("\($name): {release} placeholder used but releases is missing or empty") else . end
-    | if ($needs | not) and ($rels | length) > 0 then
-        error("\($name): releases given but no {release} placeholder") else . end
-    | (if ($rels | length) == 0 then [""] else $rels end)[] as $rel
-    | $img.tags[] | {
-      "name":       $name,
-      "source":     $img.source,
-      "tag":        (.tag | gsub("\\{release\\}"; $rel)),
-      "alias":      ((.alias // "") | gsub("\\{release\\}"; $rel)),
-      "suffix_tag": ($img.suffix_tag // false)
-    }]
-}')
-
-
-if [[ -n "$IMAGES" ]]; then
-    MATRIX=$(echo "$MATRIX" | jq -c --arg f "$IMAGES" '
-      .include |= [.[] | select(
-        .name as $n | ($f | split(",") | map(gsub("\\s";"")) | index($n)) != null
-      )]')
-fi
+MATRIX=$(IMAGES="$IMAGES" "$SCRIPT_DIR/mirror-matrix.sh" | jq -c '{include: .}')
 
 IMAGE_COUNT=$(echo "$MATRIX" | jq '.include | length')
 
@@ -98,7 +66,6 @@ if [[ "$IMAGE_COUNT" -eq 0 ]]; then
     exit 0
 fi
 
-
 echo "Destination:  $IMAGE_PREFIX"
 echo "Images:       $IMAGE_COUNT"
 [[ -n "$IMAGES" ]]  && echo "Filter:       $IMAGES"
@@ -106,7 +73,6 @@ echo "Images:       $IMAGE_COUNT"
 [[ "$FORCE" == "true" ]] && echo "Force:        copy unchanged images too"
 [[ "$DRY_RUN" == "true" ]] && echo "*** DRY RUN ***"
 echo ""
-
 
 MIRRORED=()
 SKIPPED=()
@@ -174,7 +140,6 @@ for row in $(echo "$MATRIX" | jq -r '.include[] | @base64'); do
         fi
     done
 done
-
 
 echo ""
 echo "======== Summary ========"
