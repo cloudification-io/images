@@ -6,3 +6,6 @@
 
 # CVE-2026-102268; the upstream stable bump (requirements change 1012461) was refused
 PyJWT==2.14.0
+
+# CVE-2026-112393, CVE-2026-112398, CVE-2026-112403, CVE-2026-112900, CVE-2026-96639 and ~55 lower findings
+pillow==13.0.0
