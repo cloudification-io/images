@@ -1,0 +1,9 @@
+{
+  "image": "ovn",
+  "tag": "ubuntu_noble-20260515",
+  "digest": "sha256:9996bb9569945df7f4f8c5b95f66ce51ce66c866a47f69734276f180661aab0e",
+  "image_reference": "ghcr.io/cloudification-io/ovn@sha256:9996bb9569945df7f4f8c5b95f66ce51ce66c866a47f69734276f180661aab0e",
+  "generated_at": "2026-11-02T13:54:41.281406+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 4
+}
