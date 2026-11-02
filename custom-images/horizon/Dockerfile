@@ -41,3 +41,7 @@ FROM quay.io/airshipit/horizon:${BASE_TAG}
 # replaced in the build stage would otherwise shadow the new versions
 RUN rm -rf /var/lib/openstack
 COPY --from=build --link /var/lib/openstack /var/lib/openstack
+ARG OPENSTACK_RELEASE
+RUN --mount=from=uv,source=/uv,target=/usr/local/bin/uv \
+    --mount=from=overrides,target=/overrides \
+    /overrides/apply.sh "$OPENSTACK_RELEASE"

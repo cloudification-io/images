@@ -1,0 +1,8 @@
+# Python pins applied on top of the upstream image, see overrides/apply.sh.
+# Upstream requirements freezes third-party versions per release and does not
+# bump them for CVEs on stable branches, so this file is where those fixes live.
+# name==version: drop it only when the base image ships that version anyway.
+# name>=version: for packages the base image upgrades on its own (pip); newer stays.
+
+# CVE-2026-102268; the upstream stable bump (requirements change 1012461) was refused
+PyJWT==2.14.0

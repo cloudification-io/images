@@ -11,6 +11,10 @@ RUN cd /var/lib/kolla/venv/lib/python3.12/site-packages \
     && git apply /tmp/gnocchi-restore-ended-resources.patch \
     && rm /tmp/gnocchi-restore-ended-resources.patch
 
+RUN --mount=from=uv,source=/uv,target=/usr/local/bin/uv \
+    --mount=from=overrides,target=/overrides \
+    /overrides/apply.sh "$OPENSTACK_RELEASE"
+
 RUN apt-get purge -y \
         build-essential \
         gcc \

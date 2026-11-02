@@ -11,6 +11,10 @@ RUN uv pip install -c /upper-constraints.txt jaeger-client
 
 FROM quay.io/airshipit/keystone:${BASE_TAG}
 COPY --from=build --link /var/lib/openstack /var/lib/openstack
+ARG OPENSTACK_RELEASE
+RUN --mount=from=uv,source=/uv,target=/usr/local/bin/uv \
+    --mount=from=overrides,target=/overrides \
+    /overrides/apply.sh "$OPENSTACK_RELEASE"
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libapache2-mod-auth-openidc \
     && a2enmod auth_openidc \

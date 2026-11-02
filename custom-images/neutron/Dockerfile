@@ -21,3 +21,7 @@ RUN echo "Cache bust: ${CACHE_BUST}" \
 
 FROM quay.io/airshipit/neutron:${BASE_TAG}
 COPY --from=build --link /var/lib/openstack /var/lib/openstack
+ARG OPENSTACK_RELEASE
+RUN --mount=from=uv,source=/uv,target=/usr/local/bin/uv \
+    --mount=from=overrides,target=/overrides \
+    /overrides/apply.sh "$OPENSTACK_RELEASE"

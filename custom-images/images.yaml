@@ -9,6 +9,13 @@
 # ARG OPENSTACK_RELEASE defaults inside the Dockerfiles only matter for bare
 # docker build; matrix.sh always passes the release from this file.
 #
+# Named build contexts passed to every build (docker --build-context name=source).
+# Directory sources are relative to custom-images/; overrides/ holds the Python
+# pins applied in the final stage, see overrides/apply.sh.
+build_contexts:
+  overrides: overrides
+  uv: docker-image://ghcr.io/astral-sh/uv:0.13.6@sha256:af22a52f5eafef3d78e551599d405c02df61919d18028f0cea8eda93bc9986d0
+
 # OpenStack components — ubuntu_noble base from quay.io/airshipit
 images:
   - name: horizon
@@ -19,6 +26,7 @@ images:
     base_image: "quay.io/airshipit/horizon:{release}-ubuntu_noble"
     paths:
       - horizon/
+      - overrides/
 
   - name: nova
     dockerfile: nova/Dockerfile
@@ -28,6 +36,7 @@ images:
     base_image: "quay.io/airshipit/nova:{release}-ubuntu_noble"
     paths:
       - nova/
+      - overrides/
 
   - name: octavia
     dockerfile: octavia/Dockerfile
@@ -37,6 +46,7 @@ images:
     base_image: "quay.io/airshipit/octavia:{release}-ubuntu_noble"
     paths:
       - octavia/
+      - overrides/
 
   - name: masakari
     dockerfile: masakari/Dockerfile
@@ -46,6 +56,7 @@ images:
     base_image: "quay.io/airshipit/masakari:{release}-ubuntu_noble"
     paths:
       - masakari/
+      - overrides/
 
   - name: masakari-monitors
     dockerfile: masakari-monitors/Dockerfile
@@ -55,6 +66,7 @@ images:
     base_image: "quay.io/airshipit/masakari-monitors:{release}-ubuntu_noble"
     paths:
       - masakari-monitors/
+      - overrides/
 
   - name: cinder
     dockerfile: cinder/Dockerfile
@@ -64,6 +76,7 @@ images:
     base_image: "quay.io/airshipit/cinder:{release}-ubuntu_noble"
     paths:
       - cinder/
+      - overrides/
 
   - name: glance
     dockerfile: glance/Dockerfile
@@ -73,6 +86,7 @@ images:
     base_image: "quay.io/airshipit/glance:{release}-ubuntu_noble"
     paths:
       - glance/
+      - overrides/
 
   - name: keystone
     dockerfile: keystone/Dockerfile
@@ -82,6 +96,7 @@ images:
     base_image: "quay.io/airshipit/keystone:{release}-ubuntu_noble"
     paths:
       - keystone/
+      - overrides/
 
   - name: neutron
     dockerfile: neutron/Dockerfile
@@ -91,6 +106,7 @@ images:
     base_image: "quay.io/airshipit/neutron:{release}-ubuntu_noble"
     paths:
       - neutron/
+      - overrides/
 
   - name: cloudkitty
     dockerfile: cloudkitty/Dockerfile
@@ -100,6 +116,7 @@ images:
     base_image: "quay.io/airshipit/cloudkitty:{release}-ubuntu_noble"
     paths:
       - cloudkitty/
+      - overrides/
 
   - name: designate
     dockerfile: designate/Dockerfile
@@ -109,6 +126,7 @@ images:
     base_image: "quay.io/airshipit/designate:{release}-ubuntu_noble"
     paths:
       - designate/
+      - overrides/
 
   - name: barbican
     dockerfile: barbican/Dockerfile
@@ -118,6 +136,7 @@ images:
     base_image: "quay.io/airshipit/barbican:{release}-ubuntu_noble"
     paths:
       - barbican/
+      - overrides/
 
   - name: heat
     dockerfile: heat/Dockerfile
@@ -127,6 +146,7 @@ images:
     base_image: "quay.io/airshipit/heat:{release}-ubuntu_noble"
     paths:
       - heat/
+      - overrides/
 
   - name: placement
     dockerfile: placement/Dockerfile
@@ -136,6 +156,7 @@ images:
     base_image: "quay.io/airshipit/placement:{release}-ubuntu_noble"
     paths:
       - placement/
+      - overrides/
 
   - name: manila
     dockerfile: manila/Dockerfile
@@ -145,6 +166,7 @@ images:
     base_image: "quay.io/airshipit/manila:{release}-ubuntu_noble"
     paths:
       - manila/
+      - overrides/
 
   - name: libvirt
     dockerfile: libvirt/Dockerfile
@@ -173,6 +195,7 @@ images:
     base_image: "quay.io/openstack.kolla/gnocchi-api:{release}-ubuntu-noble"
     paths:
       - gnocchi-api/
+      - overrides/
 
   - name: gnocchi-metricd
     dockerfile: gnocchi-metricd/Dockerfile
@@ -182,6 +205,7 @@ images:
     base_image: "quay.io/openstack.kolla/gnocchi-metricd:{release}-ubuntu-noble"
     paths:
       - gnocchi-metricd/
+      - overrides/
 
   # Standalone builds — different base images and versioning; bump the tools version here
   - name: openstack-tools
@@ -192,6 +216,7 @@ images:
     base_image: "docker.io/library/ubuntu:24.04"
     paths:
       - openstack-tools/
+      - overrides/
 
   # SBOM discovery image - used to generate SBOMs for other images
   - name: sbom-discovery

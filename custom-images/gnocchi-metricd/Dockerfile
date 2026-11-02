@@ -33,4 +33,7 @@ RUN apt-get purge -y \
         python3-dev \
         linux-libc-dev \
     && rm -rf /var/lib/apt/lists/*
+RUN --mount=from=uv,source=/uv,target=/usr/local/bin/uv \
+    --mount=from=overrides,target=/overrides \
+    /overrides/apply.sh "$OPENSTACK_RELEASE"
 USER gnocchi
