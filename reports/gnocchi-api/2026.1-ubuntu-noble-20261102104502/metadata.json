@@ -1,0 +1,9 @@
+{
+  "image": "gnocchi-api",
+  "tag": "2026.1-ubuntu-noble-20261102104502",
+  "digest": "sha256:c64f991f12fdd300fb931af7e6775dd61480c4f8897e317911ed4af52fc5447e",
+  "image_reference": "ghcr.io/cloudification-io/gnocchi-api@sha256:c64f991f12fdd300fb931af7e6775dd61480c4f8897e317911ed4af52fc5447e",
+  "generated_at": "2026-11-02T10:45:58.789288+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 1
+}

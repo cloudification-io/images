@@ -1,0 +1,9 @@
+{
+  "image": "horizon",
+  "tag": "2026.1-ubuntu_noble-20261102104505",
+  "digest": "sha256:8ea987f561fd7e42552208f7915c11103be1cb0f8ce641c64a5b23b66914822f",
+  "image_reference": "ghcr.io/cloudification-io/horizon@sha256:8ea987f561fd7e42552208f7915c11103be1cb0f8ce641c64a5b23b66914822f",
+  "generated_at": "2026-11-02T10:48:36.503313+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 5
+}
