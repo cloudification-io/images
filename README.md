@@ -16,7 +16,7 @@ The `overrides` directory and the pinned `uv` image are named build contexts, de
 
 ## Building images locally
 
-Builds every listed release of every image and pushes the result:
+Builds every listed release of every image; `PUSH_IMAGES=true` also pushes them:
 
 ```bash
 bash custom-images/build-local.sh
