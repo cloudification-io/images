@@ -1,0 +1,9 @@
+{
+  "image": "masakari-monitors",
+  "tag": "2025.1-ubuntu_noble-20261103120834",
+  "digest": "sha256:13f8c428fab5fee584922a67556fa38a815ddfb28f64bc2597eb3c44036b9157",
+  "image_reference": "ghcr.io/cloudification-io/masakari-monitors@sha256:13f8c428fab5fee584922a67556fa38a815ddfb28f64bc2597eb3c44036b9157",
+  "generated_at": "2026-11-03T12:09:02.008647+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}

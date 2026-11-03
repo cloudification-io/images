@@ -1,0 +1,9 @@
+{
+  "image": "ceilometer-compute",
+  "tag": "2026.1-ubuntu-noble-20261103120720",
+  "digest": "sha256:029e3525f42094b6b20d8a7c331747750497b08a1043996d6ec6d8b5c61be83a",
+  "image_reference": "ghcr.io/cloudification-io/ceilometer-compute@sha256:029e3525f42094b6b20d8a7c331747750497b08a1043996d6ec6d8b5c61be83a",
+  "generated_at": "2026-11-03T12:08:14.967321+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}
