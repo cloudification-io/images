@@ -1,0 +1,9 @@
+{
+  "image": "glance",
+  "tag": "2026.1-ubuntu_noble-20261109110852",
+  "digest": "sha256:9879b626dfd4f57c894315743f6a71ee7b8ab1f073a3ebf425bc099ab8ff9d13",
+  "image_reference": "ghcr.io/cloudification-io/glance@sha256:9879b626dfd4f57c894315743f6a71ee7b8ab1f073a3ebf425bc099ab8ff9d13",
+  "generated_at": "2026-11-09T11:10:13.891315+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}

@@ -1,0 +1,9 @@
+{
+  "image": "cloudkitty",
+  "tag": "2026.1-ubuntu_noble-20261109110850",
+  "digest": "sha256:bbf6ab4ab1004527b13e8451be1e01f94512d09bae73249d31e3fc18d7dd2ed9",
+  "image_reference": "ghcr.io/cloudification-io/cloudkitty@sha256:bbf6ab4ab1004527b13e8451be1e01f94512d09bae73249d31e3fc18d7dd2ed9",
+  "generated_at": "2026-11-09T11:09:32.649376+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}
