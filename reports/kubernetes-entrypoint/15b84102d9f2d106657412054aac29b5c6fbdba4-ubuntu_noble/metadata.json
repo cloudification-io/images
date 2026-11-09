@@ -3,7 +3,7 @@
   "tag": "15b84102d9f2d106657412054aac29b5c6fbdba4-ubuntu_noble",
   "digest": "sha256:3376f89944cce28c65c10c69cdf6e62b88b77d231b913f9bcfc4f95c22afb56c",
   "image_reference": "ghcr.io/cloudification-io/kubernetes-entrypoint@sha256:3376f89944cce28c65c10c69cdf6e62b88b77d231b913f9bcfc4f95c22afb56c",
-  "generated_at": "2026-11-02T13:54:37.770239+00:00",
+  "generated_at": "2026-11-09T08:50:06.784544+00:00",
   "report": "index.html",
   "critical_vulnerabilities": 1
 }

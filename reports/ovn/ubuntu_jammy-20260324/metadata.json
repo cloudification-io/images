@@ -3,7 +3,7 @@
   "tag": "ubuntu_jammy-20260324",
   "digest": "sha256:0678ae0eedfc4aa80d2324beaab47abc030b2e31197c139df2e4bf8557353418",
   "image_reference": "ghcr.io/cloudification-io/ovn@sha256:0678ae0eedfc4aa80d2324beaab47abc030b2e31197c139df2e4bf8557353418",
-  "generated_at": "2026-11-02T13:55:12.276036+00:00",
+  "generated_at": "2026-11-09T08:50:12.132487+00:00",
   "report": "index.html",
   "critical_vulnerabilities": 4
 }

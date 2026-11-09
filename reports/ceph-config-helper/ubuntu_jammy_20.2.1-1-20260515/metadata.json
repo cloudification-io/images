@@ -3,7 +3,7 @@
   "tag": "ubuntu_jammy_20.2.1-1-20260515",
   "digest": "sha256:b60f542bb084838dc55bd94d82b5a608d8233a97e2850a8ef7034ddc708570d3",
   "image_reference": "ghcr.io/cloudification-io/ceph-config-helper@sha256:b60f542bb084838dc55bd94d82b5a608d8233a97e2850a8ef7034ddc708570d3",
-  "generated_at": "2026-11-02T13:54:46.695627+00:00",
+  "generated_at": "2026-11-09T08:50:18.535878+00:00",
   "report": "index.html",
   "critical_vulnerabilities": 0
 }
