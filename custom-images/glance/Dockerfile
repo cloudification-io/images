@@ -17,3 +17,6 @@ ARG OPENSTACK_RELEASE
 RUN --mount=from=uv,source=/uv,target=/usr/local/bin/uv \
     --mount=from=overrides,target=/overrides \
     /overrides/apply.sh "$OPENSTACK_RELEASE"
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends qemu-utils \
+    && rm -rf /var/lib/apt/lists/*
