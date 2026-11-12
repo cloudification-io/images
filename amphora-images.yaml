@@ -1,0 +1,10 @@
+# Octavia amphora images published as GitHub releases, one image per entry.
+#
+# release: OpenStack release (quoted string); the Octavia branch is stable/<release>,
+#          or unmaintained/<release> once upstream has renamed it.
+# ubuntu:  Ubuntu release of the image.
+images:
+  - release: "2025.1"
+    ubuntu: noble
+  - release: "2026.1"
+    ubuntu: noble
