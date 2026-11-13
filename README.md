@@ -49,6 +49,24 @@ bash custom-images/build-local.sh
 - weekly (Monday 03:00 UTC), the rows whose `base_image` digest differs from the one recorded on the last build (label `org.opencontainers.image.base.digest`); the job summary lists the decision per row
 - on `workflow_dispatch`, with the same `images` and `openstack_release` filters as the local script; leave both empty to force a full rebuild
 
+## Octavia amphora images
+
+[build-amphora-image.yml](.github/workflows/build-amphora-image.yml) builds one amphora VM image per entry of [amphora-images.yaml](amphora-images.yaml) with upstream's `diskimage-create.sh` (haproxy, amd64, qcow2, script defaults) and publishes each as its own GitHub release, twice a month (day 1 and 15, 04:00 UTC) and on `workflow_dispatch` from `main`. The `openstack_release` dispatch input limits a run to one release.
+
+An entry is an OpenStack `release` and the `ubuntu` release of the image; a new OpenStack release is one more entry. The Octavia branch is `stable/<release>`, or `unmaintained/<release>` once upstream has renamed it. The amphora agent is installed from the same Octavia commit as the build script and octavia-lib from the head of its branch; the release notes name both commits.
+
+| | |
+|---|---|
+| Tag | `amphora-<release>-<ubuntu>-<YYYYMM>-<nnn>`, e.g. `amphora-2026.1-noble-202612-001`; `nnn` counts the releases of that image in that UTC month |
+| Image | `amphora-x64-haproxy-<release>-<ubuntu>.qcow2`, the same name in every release of that image |
+| Checksum | `SHA256SUMS` in `sha256sum` format, check with `sha256sum -c SHA256SUMS` |
+| Packages | `packages.txt`, one `<package> <version>` line per package in the image; the release notes repeat the kernel and haproxy versions |
+| Address | `https://github.com/cloudification-io/images/releases/download/<tag>/<file>` |
+
+Published releases are kept and never replaced, so an environment pins a tag. No release is marked as latest, because the newest one belongs to whichever OpenStack release was published last.
+
+A pull request that changes the workflow or the list builds the images as a test and publishes nothing. Each test image is attached to the workflow run as an `amphora-image-<release>-<ubuntu>` artifact, which GitHub deletes after 7 days; it is for trying a change, not for an environment.
+
 ## Mirroring upstream images
 
 [mirror-upstream.yml](.github/workflows/mirror-upstream.yml) copies the images in [mirror-images.yaml](mirror-images.yaml) from quay.io to `ghcr.io/cloudification-io` with `mirror-to-ghcr.sh`, on a push that changes the file and weekly (Monday 02:00 UTC). `mirror-matrix.sh` expands the file into rows for the script and for CI. After the copy, every listed tag is scanned with Trivy and the reports are published to the same GitHub Pages site as the custom image reports. Kolla entries list their `releases` and use `{release}` in the tag. A tag is copied only when its upstream digest differs from the unsuffixed copy on GHCR, so unchanged images get no new dated tag; the `force` dispatch input (or `FORCE=true`) copies everything.
