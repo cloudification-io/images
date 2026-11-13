@@ -26,5 +26,12 @@ images:
     tags:
       - tag: 15b84102d9f2d106657412054aac29b5c6fbdba4-ubuntu_noble
 
+  # Upstream moves "latest" without a dated tag; suffix_tag keeps each build as latest-YYYYmmdd
+  - name: openstack-exporter
+    source: ghcr.io/openstack-exporter/openstack-exporter
+    suffix_tag: true
+    tags:
+      - tag: latest
+
   # Kolla service images carry a Python venv and are built from custom-images/overlay
   # instead (see custom-images/images.yaml); only images without one are mirrored.
