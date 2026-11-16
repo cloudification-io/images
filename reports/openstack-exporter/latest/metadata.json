@@ -1,0 +1,9 @@
+{
+  "image": "openstack-exporter",
+  "tag": "latest",
+  "digest": "sha256:6dce97ddea9e2d19f1c7190b60214ff4c0776149433b3ece915bfeb348b600a8",
+  "image_reference": "ghcr.io/cloudification-io/openstack-exporter@sha256:6dce97ddea9e2d19f1c7190b60214ff4c0776149433b3ece915bfeb348b600a8",
+  "generated_at": "2026-11-16T12:18:17.155862+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}
