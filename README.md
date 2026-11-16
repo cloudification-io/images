@@ -51,7 +51,7 @@ bash custom-images/build-local.sh
 
 ## Mirroring upstream images
 
-[mirror-upstream.yml](.github/workflows/mirror-upstream.yml) copies the images in [mirror-images.yaml](mirror-images.yaml) from quay.io to `ghcr.io/cloudification-io` with `mirror-to-ghcr.sh`, on a push that changes the file and weekly (Monday 02:00 UTC). `mirror-matrix.sh` expands the file into rows for the script and for CI. After the copy, every listed tag is scanned with Trivy and the reports are published to the same GitHub Pages site as the custom image reports. Kolla entries list their `releases` and use `{release}` in the tag. A tag is copied only when its upstream digest differs from the unsuffixed copy on GHCR, so unchanged images get no new dated tag; the `force` dispatch input (or `FORCE=true`) copies everything.
+[mirror-upstream.yml](.github/workflows/mirror-upstream.yml) copies the images in [mirror-images.yaml](mirror-images.yaml) from their upstream registries to `ghcr.io/cloudification-io` with `mirror-to-ghcr.sh`, on a push that changes the file and weekly (Monday 02:00 UTC). `mirror-matrix.sh` expands the file into rows for the script and for CI. After the copy, every listed tag is scanned with Trivy and the reports are published to the same GitHub Pages site as the custom image reports. Kolla entries list their `releases` and use `{release}` in the tag. An entry with `suffix_tag: true` also gets a dated copy, `<tag>-YYYYmmdd`, each time its upstream digest changes; use it for upstream tags that move, such as `latest`. A tag is copied only when its upstream digest differs from the unsuffixed copy on GHCR, so unchanged images get no new dated tag; the `force` dispatch input (or `FORCE=true`) copies everything.
 
 ## Mirroring images to Docker Hub
 
