@@ -1,0 +1,9 @@
+{
+  "image": "ceilometer-notification",
+  "tag": "2026.1-ubuntu-noble-20261116105045",
+  "digest": "sha256:7074c4035f7a7cfec53022ca5e0b4cd819a7553d4760947ac068532229a1a37d",
+  "image_reference": "ghcr.io/cloudification-io/ceilometer-notification@sha256:7074c4035f7a7cfec53022ca5e0b4cd819a7553d4760947ac068532229a1a37d",
+  "generated_at": "2026-11-16T10:51:33.610575+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}
