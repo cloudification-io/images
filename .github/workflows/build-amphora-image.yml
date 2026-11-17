@@ -1,0 +1,262 @@
+name: Build amphora images
+
+on:
+  workflow_dispatch:
+    inputs:
+      openstack_release:
+        description: "OpenStack release filter (empty = all)"
+        required: false
+        default: ""
+        type: string
+  pull_request:
+    paths:
+      - ".github/workflows/build-amphora-image.yml"
+      - "amphora-images.yaml"
+  schedule:
+    # day 1 and 15: pick up Ubuntu package updates and Octavia branch fixes
+    - cron: "0 4 1,15 * *"
+
+concurrency:
+  group: build-amphora-image-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    # an explicit shell runs with pipefail
+    shell: bash
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      matrix: ${{ steps.matrix.outputs.result }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Image matrix
+        id: matrix
+        env:
+          RELEASE: ${{ inputs.openstack_release }}
+        run: |
+          ROWS=$(yq -o=json '.images' amphora-images.yaml |
+            jq -c --arg release "$RELEASE" 'map(select($release == "" or .release == $release))')
+          if [ "$(jq length <<<"$ROWS")" -eq 0 ]; then
+            echo "amphora-images.yaml has no image for release '$RELEASE'" >&2
+            exit 1
+          fi
+          MATRIX=$(jq -c '{include: .}' <<<"$ROWS")
+          echo "result=${MATRIX}" | tee -a "$GITHUB_OUTPUT"
+
+  build:
+    needs: setup
+    # noble host for a noble image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
+    env:
+      OPENSTACK_RELEASE: ${{ matrix.release }}
+      UBUNTU_RELEASE: ${{ matrix.ubuntu }}
+      IMAGE_FILE: amphora-x64-haproxy-${{ matrix.release }}-${{ matrix.ubuntu }}.qcow2
+    steps:
+      - name: Resolve branches
+        id: refs
+        run: |
+          # prints "<branch> <commit>" of the stable or unmaintained branch
+          resolve() {
+            local repo=$1 prefix sha
+            for prefix in stable unmaintained; do
+              sha=$(git ls-remote "$repo" "refs/heads/${prefix}/${OPENSTACK_RELEASE}") || return
+              if [ -n "$sha" ]; then
+                echo "${prefix}/${OPENSTACK_RELEASE} ${sha%%[[:space:]]*}"
+                return
+              fi
+            done
+            echo "${repo} has no stable or unmaintained ${OPENSTACK_RELEASE} branch" >&2
+            return 1
+          }
+          OCTAVIA=$(resolve https://github.com/openstack/octavia)
+          OCTAVIA_LIB=$(resolve https://opendev.org/openstack/octavia-lib)
+          {
+            echo "octavia_branch=${OCTAVIA% *}"
+            echo "octavia_lib_sha=${OCTAVIA_LIB#* }"
+          } | tee -a "$GITHUB_OUTPUT"
+
+      - name: Checkout octavia
+        uses: actions/checkout@v7
+        with:
+          repository: openstack/octavia
+          ref: ${{ steps.refs.outputs.octavia_branch }}
+          path: octavia
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-utils git kpartx debootstrap
+          python3 -m venv "$RUNNER_TEMP/dib"
+          # diskimage-builder before 3.38 imports pkg_resources, which setuptools 82 removed
+          "$RUNNER_TEMP/dib/bin/pip" install \
+            -c "https://releases.openstack.org/constraints/upper/${OPENSTACK_RELEASE}" \
+            -r octavia/diskimage-create/requirements.txt \
+            "setuptools<82"
+          echo "$RUNNER_TEMP/dib/bin" >> "$GITHUB_PATH"
+
+      - name: Image metadata
+        id: meta
+        run: |
+          OCTAVIA_SHA=$(git -C octavia rev-parse HEAD)
+          DIB_VERSION=$(disk-image-create --version)
+          {
+            echo "octavia_sha=${OCTAVIA_SHA}"
+            echo "dib_version=${DIB_VERSION}"
+          } | tee -a "$GITHUB_OUTPUT"
+
+      - name: Build image
+        env:
+          # agent from the same commit as the elements
+          DIB_REPOLOCATION_amphora_agent: ${{ github.workspace }}/octavia
+          DIB_REPOREF_amphora_agent: ${{ steps.meta.outputs.octavia_sha }}
+          # the element default names stable/<release>, which upstream deletes
+          DIB_REPOREF_octavia_lib: ${{ steps.refs.outputs.octavia_lib_sha }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/out"
+          ./octavia/diskimage-create/diskimage-create.sh \
+            -d "$UBUNTU_RELEASE" \
+            -w "$RUNNER_TEMP/work" \
+            -o "$RUNNER_TEMP/out/$IMAGE_FILE"
+
+      - name: Check image
+        working-directory: ${{ runner.temp }}/out
+        run: |
+          qemu-img info "$IMAGE_FILE"
+          qemu-img info --output=json "$IMAGE_FILE" | jq -e '.format == "qcow2"' > /dev/null
+          qemu-img check "$IMAGE_FILE"
+          # a release asset must be smaller than 2 GiB
+          [ "$(stat -c %s "$IMAGE_FILE")" -lt 2147483648 ]
+
+      - name: Checksum
+        id: checksum
+        working-directory: ${{ runner.temp }}/out
+        run: |
+          sha256sum "$IMAGE_FILE" | tee SHA256SUMS
+          SHA256=$(cut -d' ' -f1 SHA256SUMS)
+          echo "sha256=${SHA256}" >> "$GITHUB_OUTPUT"
+
+      - name: Package list
+        id: packages
+        working-directory: ${{ runner.temp }}/out
+        run: |
+          NAME="${IMAGE_FILE%.qcow2}"
+          jq -r '.packages[] | "\(.package) \(.version)"' \
+            "${NAME}.d/dib-manifests/dib-manifest-dpkg-${NAME}" | sort > packages.txt
+          for PACKAGE in linux-image-virtual haproxy; do
+            VERSION=$(awk -v p="$PACKAGE" '$1 == p {print $2}' packages.txt)
+            : "${VERSION:?$PACKAGE is not in the image}"
+            echo "$PACKAGE $VERSION"
+            echo "${PACKAGE/linux-image-virtual/kernel}=$VERSION" >> "$GITHUB_OUTPUT"
+          done
+
+      - name: Release notes
+        working-directory: ${{ runner.temp }}/out
+        env:
+          OCTAVIA_BRANCH: ${{ steps.refs.outputs.octavia_branch }}
+          OCTAVIA_SHA: ${{ steps.meta.outputs.octavia_sha }}
+          OCTAVIA_LIB_SHA: ${{ steps.refs.outputs.octavia_lib_sha }}
+          DIB_VERSION: ${{ steps.meta.outputs.dib_version }}
+          KERNEL: ${{ steps.packages.outputs.kernel }}
+          HAPROXY: ${{ steps.packages.outputs.haproxy }}
+          SHA256: ${{ steps.checksum.outputs.sha256 }}
+        run: |
+          cat > notes.md <<EOF
+          Octavia amphora image for OpenStack ${OPENSTACK_RELEASE}: Ubuntu ${UBUNTU_RELEASE}, haproxy, amd64, built with upstream \`diskimage-create.sh\`.
+
+          | | |
+          |---|---|
+          | Octavia | [\`${OCTAVIA_SHA}\`](https://opendev.org/openstack/octavia/commit/${OCTAVIA_SHA}) on \`${OCTAVIA_BRANCH}\` |
+          | octavia-lib | [\`${OCTAVIA_LIB_SHA}\`](https://opendev.org/openstack/octavia-lib/commit/${OCTAVIA_LIB_SHA}) |
+          | diskimage-builder | \`${DIB_VERSION}\` |
+          | \`linux-image-virtual\` | \`${KERNEL}\` |
+          | \`haproxy\` | \`${HAPROXY}\` |
+          | SHA-256 | \`${SHA256}\` |
+
+          \`packages.txt\` lists every package in the image with its version.
+          EOF
+          cat notes.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload image
+        uses: actions/upload-artifact@v7
+        with:
+          name: amphora-image-${{ matrix.release }}-${{ matrix.ubuntu }}
+          path: |
+            ${{ runner.temp }}/out/${{ env.IMAGE_FILE }}
+            ${{ runner.temp }}/out/SHA256SUMS
+            ${{ runner.temp }}/out/packages.txt
+            ${{ runner.temp }}/out/notes.md
+          # qcow2 is compressed already
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+
+  release:
+    needs: [setup, build]
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
+    env:
+      OPENSTACK_RELEASE: ${{ matrix.release }}
+      UBUNTU_RELEASE: ${{ matrix.ubuntu }}
+      IMAGE_FILE: amphora-x64-haproxy-${{ matrix.release }}-${{ matrix.ubuntu }}.qcow2
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Download image
+        uses: actions/download-artifact@v8
+        with:
+          name: amphora-image-${{ matrix.release }}-${{ matrix.ubuntu }}
+          path: amphora
+
+      - name: Verify checksum
+        working-directory: amphora
+        run: sha256sum -c SHA256SUMS
+
+      - name: Next release tag
+        id: tag
+        run: |
+          PREFIX="amphora-${OPENSTACK_RELEASE}-${UBUNTU_RELEASE}-$(date -u +%Y%m)-"
+          LAST=$(gh api --paginate "repos/${GITHUB_REPOSITORY}/git/matching-refs/tags/${PREFIX}" --jq '.[].ref' |
+            sed -n "s|^refs/tags/${PREFIX}\([0-9]\{3\}\)$|\1|p" | sort | tail -n 1)
+          echo "tag=${PREFIX}$(printf '%03d' $((10#${LAST:-0} + 1)))" | tee -a "$GITHUB_OUTPUT"
+
+      - name: Publish release
+        working-directory: amphora
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          {
+            echo
+            echo '```'
+            echo "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${TAG}/${IMAGE_FILE}"
+            echo '```'
+          } >> notes.md
+          # "latest" would flip between the OpenStack releases
+          gh release create "$TAG" "$IMAGE_FILE" SHA256SUMS packages.txt \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Amphora ${OPENSTACK_RELEASE} ${UBUNTU_RELEASE} ${TAG#amphora-*-*-}" \
+            --notes-file notes.md \
+            --latest=false
+          echo "### [${TAG}](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${TAG})" >> "$GITHUB_STEP_SUMMARY"
