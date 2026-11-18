@@ -9,6 +9,7 @@ images:
   - name: ceph-config-helper
     source: quay.io/airshipit/ceph-config-helper
     tags:
+      - tag: ubuntu_noble_20.2.4-1-20261118
       - tag: ubuntu_jammy_20.2.1-1-20260515
       - tag: ubuntu_jammy_20.2.0-1-20260323
       - tag: ubuntu_jammy_19.2.3-1-20260116
@@ -16,14 +17,16 @@ images:
   - name: ovn
     source: quay.io/airshipit/ovn
     tags:
-      - tag: ubuntu_noble-20260515
+      - tag: ubuntu_noble-20261118
         alias: ubuntu_noble
+      - tag: ubuntu_noble-20260515
       - tag: ubuntu_jammy-20260324
         alias: ubuntu_jammy
 
   - name: kubernetes-entrypoint
     source: quay.io/airshipit/kubernetes-entrypoint
     tags:
+      - tag: c606628c7dc0fcc5654a87e5fe572ae0a456307a-ubuntu_noble
       - tag: 15b84102d9f2d106657412054aac29b5c6fbdba4-ubuntu_noble
 
   # Upstream moves "latest" without a dated tag; suffix_tag keeps each build as latest-YYYYmmdd
