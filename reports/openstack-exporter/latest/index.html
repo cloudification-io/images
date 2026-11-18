@@ -418,8 +418,8 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
   "Trivy": {
     "Version": "0.70.0"
   },
-  "ReportID": "01a1e44b-30e9-7436-af67-5c8b4aeffdb9",
-  "CreatedAt": "2026-11-16T12:18:15.401277601Z",
+  "ReportID": "01a1f111-2e96-77d3-a53e-e48ae213702d",
+  "CreatedAt": "2026-11-18T23:49:57.52651507Z",
   "ArtifactID": "sha256:5215244e03c5e7a2e8d0895913f488e7919e6187bdabb960d4dabc43dc095465",
   "ArtifactName": "ghcr.io/cloudification-io/openstack-exporter@sha256:6dce97ddea9e2d19f1c7190b60214ff4c0776149433b3ece915bfeb348b600a8",
   "ArtifactType": "container_image",
@@ -2417,6 +2417,52 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
       ],
       "Vulnerabilities": [
         {
+          "VulnerabilityID": "CVE-2026-115819",
+          "PkgID": "libc6@2.41-12+deb13u4",
+          "PkgName": "libc6",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libc6@2.41-12%2Bdeb13u4?arch=amd64\u0026distro=debian-13.7",
+            "UID": "3ca032b3dd7124c6"
+          },
+          "InstalledVersion": "2.41-12+deb13u4",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:b96fe2995f90d0ef0bf14f9b4a67b5f4e77d478e6108166e0565adc9efd6e4a3",
+            "DiffID": "sha256:8a3b315d45080ecb38e39d42d28e951303c67c2ce7482bcdbbc3b5424be19013"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-115819",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Fingerprint": "sha256:1999d6d455f918b54017965bbe844c56ae9439ba02543fc484ed941351a0353d",
+          "Title": "glibc: glibc: Memory corruption via out-of-bounds write in wide scanf functions",
+          "Description": "Calling the wide scanf family of functions (swscanf, fwscanf, wscanf, vswscanf, vfwscanf and vwscanf) with a %s or %[ conversion without the 'l' length modifier in the GNU C Library version 2.2 to version 2.44 writes an extra null byte one past the end of the destination array when the converted multibyte string and its terminating null byte exactly fill that array.\n\nThese conversions store each wide input character into the caller's char array as a multibyte sequence.  The conversion ends with the sequence that returns to the initial shift state, which also stores the terminating null byte, and the functions then append a second null byte.  A destination sized for the converted string and one terminator, as the C standard requires the caller to provide, is therefore written one byte past its end.  The out-of-bounds byte is always a null byte, which may corrupt adjacent data or crash the process.  An attacker who supplies the input can trigger the overflow with a string whose converted length exactly fills the destination.\n\nThe narrow scanf functions, the %ls and %l[ conversions into a wchar_t array, and the 'a' and 'm' allocation modifiers are not affected, and storing a wide scanf conversion into a narrow char array is uncommon.  This issue affects all architectures and ABIs supported by the GNU C Library.",
+          "Severity": "MEDIUM",
+          "CweIDs": [
+            "CWE-193"
+          ],
+          "VendorSeverity": {
+            "redhat": 2
+          },
+          "CVSS": {
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:L",
+              "V3Score": 4.8
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-115819",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-115819",
+            "https://sourceware.org/bugzilla/show_bug.cgi?id=34989",
+            "https://sourceware.org/git/?p=glibc.git;a=blob_plain;f=advisories/GLIBC-SA-2026-0027",
+            "https://www.cve.org/CVERecord?id=CVE-2026-115819"
+          ],
+          "PublishedDate": "2026-11-11T16:17:24.98Z",
+          "LastModifiedDate": "2026-11-17T15:17:31.913Z"
+        },
+        {
           "VulnerabilityID": "CVE-2026-18374",
           "PkgID": "libc6@2.41-12+deb13u4",
           "PkgName": "libc6",
@@ -2459,12 +2505,12 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
           "References": [
             "http://www.openwall.com/lists/oss-security/2026/08/27/6",
             "https://access.redhat.com/errata/RHSA-2026:79281",
+            "https://access.redhat.com/errata/RHSA-2026:84753",
             "https://access.redhat.com/security/cve/CVE-2026-18374",
-            "https://bugzilla.redhat.com/2513603",
-            "https://bugzilla.redhat.com/2513608",
-            "https://bugzilla.redhat.com/2523249",
             "https://bugzilla.redhat.com/2523274",
             "https://bugzilla.redhat.com/2524870",
+            "https://bugzilla.redhat.com/2525256",
+            "https://bugzilla.redhat.com/2536382",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2513603",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2513608",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2523249",
@@ -2478,7 +2524,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-6791",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-77117",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-80489",
-            "https://errata.almalinux.org/9/ALSA-2026-79281.html",
+            "https://errata.almalinux.org/10/ALSA-2026-84753.html",
             "https://errata.rockylinux.org/RLSA-2026:79281",
             "https://linux.oracle.com/cve/CVE-2026-18374.html",
             "https://linux.oracle.com/errata/ELSA-2026-84753.html",
@@ -2599,13 +2645,9 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:76781",
             "https://access.redhat.com/errata/RHSA-2026:79281",
             "https://access.redhat.com/security/cve/CVE-2026-19542",
-            "https://bugzilla.redhat.com/2513603",
-            "https://bugzilla.redhat.com/2513608",
-            "https://bugzilla.redhat.com/2523249",
-            "https://bugzilla.redhat.com/2523274",
-            "https://bugzilla.redhat.com/2524870",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2513603",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2513608",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2523249",
@@ -2619,7 +2661,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-6791",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-77117",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-80489",
-            "https://errata.almalinux.org/9/ALSA-2026-79281.html",
+            "https://errata.almalinux.org/10/ALSA-2026-76781.html",
             "https://errata.rockylinux.org/RLSA-2026:79281",
             "https://linux.oracle.com/cve/CVE-2026-19542.html",
             "https://linux.oracle.com/errata/ELSA-2026-80798.html",
@@ -2674,6 +2716,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:42694",
             "https://access.redhat.com/errata/RHSA-2026:42952",
             "https://access.redhat.com/security/cve/CVE-2026-5435",
             "https://bugzilla.redhat.com/2459854",
@@ -2687,7 +2730,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-5435",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-5928",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-6238",
-            "https://errata.almalinux.org/9/ALSA-2026-42952.html",
+            "https://errata.almalinux.org/10/ALSA-2026-42694.html",
             "https://errata.rockylinux.org/RLSA-2026:42952",
             "https://inbox.sourceware.org/libc-alpha/cover.1777546194.git.fweimer@redhat.com/",
             "https://inbox.sourceware.org/libc-announce/7a655d55-276f-41fe-b550-feb3ebb2ce91@redhat.com/T/#u",
@@ -2743,6 +2786,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:42694",
             "https://access.redhat.com/errata/RHSA-2026:42952",
             "https://access.redhat.com/security/cve/CVE-2026-6238",
             "https://bugzilla.redhat.com/2459854",
@@ -2756,7 +2800,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-5435",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-5928",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-6238",
-            "https://errata.almalinux.org/9/ALSA-2026-42952.html",
+            "https://errata.almalinux.org/10/ALSA-2026-42694.html",
             "https://errata.rockylinux.org/RLSA-2026:42952",
             "https://inbox.sourceware.org/libc-alpha/cover.1777546194.git.fweimer@redhat.com/",
             "https://inbox.sourceware.org/libc-announce/7a655d55-276f-41fe-b550-feb3ebb2ce91@redhat.com/T/#u",
@@ -2812,13 +2856,9 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:76781",
             "https://access.redhat.com/errata/RHSA-2026:79281",
             "https://access.redhat.com/security/cve/CVE-2026-6368",
-            "https://bugzilla.redhat.com/2513603",
-            "https://bugzilla.redhat.com/2513608",
-            "https://bugzilla.redhat.com/2523249",
-            "https://bugzilla.redhat.com/2523274",
-            "https://bugzilla.redhat.com/2524870",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2513603",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2513608",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2523249",
@@ -2832,7 +2872,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-6791",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-77117",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-80489",
-            "https://errata.almalinux.org/9/ALSA-2026-79281.html",
+            "https://errata.almalinux.org/10/ALSA-2026-76781.html",
             "https://errata.rockylinux.org/RLSA-2026:79281",
             "https://linux.oracle.com/cve/CVE-2026-6368.html",
             "https://linux.oracle.com/errata/ELSA-2026-79281.html",
@@ -2888,13 +2928,9 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:76781",
             "https://access.redhat.com/errata/RHSA-2026:79281",
             "https://access.redhat.com/security/cve/CVE-2026-6791",
-            "https://bugzilla.redhat.com/2513603",
-            "https://bugzilla.redhat.com/2513608",
-            "https://bugzilla.redhat.com/2523249",
-            "https://bugzilla.redhat.com/2523274",
-            "https://bugzilla.redhat.com/2524870",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2513603",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2513608",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2523249",
@@ -2908,7 +2944,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-6791",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-77117",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-80489",
-            "https://errata.almalinux.org/9/ALSA-2026-79281.html",
+            "https://errata.almalinux.org/10/ALSA-2026-76781.html",
             "https://errata.rockylinux.org/RLSA-2026:79281",
             "https://linux.oracle.com/cve/CVE-2026-6791.html",
             "https://linux.oracle.com/errata/ELSA-2026-79281.html",
@@ -2964,12 +3000,12 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
           },
           "References": [
             "https://access.redhat.com/errata/RHSA-2026:79281",
+            "https://access.redhat.com/errata/RHSA-2026:84753",
             "https://access.redhat.com/security/cve/CVE-2026-77117",
-            "https://bugzilla.redhat.com/2513603",
-            "https://bugzilla.redhat.com/2513608",
-            "https://bugzilla.redhat.com/2523249",
             "https://bugzilla.redhat.com/2523274",
             "https://bugzilla.redhat.com/2524870",
+            "https://bugzilla.redhat.com/2525256",
+            "https://bugzilla.redhat.com/2536382",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2513603",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2513608",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2523249",
@@ -2983,7 +3019,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-6791",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-77117",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-80489",
-            "https://errata.almalinux.org/9/ALSA-2026-79281.html",
+            "https://errata.almalinux.org/10/ALSA-2026-84753.html",
             "https://errata.rockylinux.org/RLSA-2026:79281",
             "https://linux.oracle.com/cve/CVE-2026-77117.html",
             "https://linux.oracle.com/errata/ELSA-2026-84753.html",
@@ -3039,12 +3075,12 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
           },
           "References": [
             "https://access.redhat.com/errata/RHSA-2026:79281",
+            "https://access.redhat.com/errata/RHSA-2026:84753",
             "https://access.redhat.com/security/cve/CVE-2026-80489",
-            "https://bugzilla.redhat.com/2513603",
-            "https://bugzilla.redhat.com/2513608",
-            "https://bugzilla.redhat.com/2523249",
             "https://bugzilla.redhat.com/2523274",
             "https://bugzilla.redhat.com/2524870",
+            "https://bugzilla.redhat.com/2525256",
+            "https://bugzilla.redhat.com/2536382",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2513603",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2513608",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2523249",
@@ -3058,7 +3094,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-6791",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-77117",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-80489",
-            "https://errata.almalinux.org/9/ALSA-2026-79281.html",
+            "https://errata.almalinux.org/10/ALSA-2026-84753.html",
             "https://errata.rockylinux.org/RLSA-2026:79281",
             "https://linux.oracle.com/cve/CVE-2026-80489.html",
             "https://linux.oracle.com/errata/ELSA-2026-84753.html",
@@ -3163,12 +3199,13 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
           },
           "References": [
             "http://www.openwall.com/lists/oss-security/2026/09/17/4",
+            "https://access.redhat.com/errata/RHSA-2026:84753",
             "https://access.redhat.com/errata/RHSA-2026:95618",
             "https://access.redhat.com/security/cve/CVE-2026-8674",
-            "https://bugzilla.redhat.com/2531725",
+            "https://bugzilla.redhat.com/2523274",
+            "https://bugzilla.redhat.com/2524870",
+            "https://bugzilla.redhat.com/2525256",
             "https://bugzilla.redhat.com/2536382",
-            "https://bugzilla.redhat.com/2538209",
-            "https://bugzilla.redhat.com/2538306",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2531725",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2536382",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2538209",
@@ -3178,7 +3215,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-86805",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-89092",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-95818",
-            "https://errata.almalinux.org/9/ALSA-2026-95618.html",
+            "https://errata.almalinux.org/10/ALSA-2026-84753.html",
             "https://errata.rockylinux.org/RLSA-2026:95618",
             "https://joshua.hu/fuzzing-glibc-libresolv",
             "https://linux.oracle.com/cve/CVE-2026-8674.html",
@@ -3237,23 +3274,20 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:95618",
+            "https://access.redhat.com/errata/RHSA-2026:98512",
+            "https://access.redhat.com/errata/RHSA-2026:98599",
             "https://access.redhat.com/security/cve/CVE-2026-86805",
-            "https://bugzilla.redhat.com/2531725",
-            "https://bugzilla.redhat.com/2536382",
             "https://bugzilla.redhat.com/2538209",
             "https://bugzilla.redhat.com/2538306",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2531725",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2536382",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2538209",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2538306",
             "https://creativecommons.org/licenses/by/4.0/",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-8674",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-86805",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-89092",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-95818",
-            "https://errata.almalinux.org/9/ALSA-2026-95618.html",
-            "https://errata.rockylinux.org/RLSA-2026:95618",
+            "https://errata.almalinux.org/10/ALSA-2026-98599.html",
+            "https://errata.rockylinux.org/RLSA-2026:98512",
             "https://linux.oracle.com/cve/CVE-2026-86805.html",
             "https://linux.oracle.com/errata/ELSA-2026-96087.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-86805",
@@ -3308,23 +3342,20 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
           },
           "References": [
             "http://www.openwall.com/lists/oss-security/2026/09/11/2",
-            "https://access.redhat.com/errata/RHSA-2026:95618",
+            "https://access.redhat.com/errata/RHSA-2026:98512",
             "https://access.redhat.com/security/cve/CVE-2026-89092",
             "https://bugzilla.redhat.com/2531725",
-            "https://bugzilla.redhat.com/2536382",
             "https://bugzilla.redhat.com/2538209",
             "https://bugzilla.redhat.com/2538306",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2531725",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2536382",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2538209",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2538306",
             "https://creativecommons.org/licenses/by/4.0/",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-8674",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-86805",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-89092",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-95818",
-            "https://errata.almalinux.org/9/ALSA-2026-95618.html",
-            "https://errata.rockylinux.org/RLSA-2026:95618",
+            "https://errata.almalinux.org/9/ALSA-2026-98512.html",
+            "https://errata.rockylinux.org/RLSA-2026:98512",
             "https://linux.oracle.com/cve/CVE-2026-89092.html",
             "https://linux.oracle.com/errata/ELSA-2026-96087.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-89092",
@@ -3378,23 +3409,20 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:95618",
+            "https://access.redhat.com/errata/RHSA-2026:98512",
+            "https://access.redhat.com/errata/RHSA-2026:98599",
             "https://access.redhat.com/security/cve/CVE-2026-95818",
-            "https://bugzilla.redhat.com/2531725",
-            "https://bugzilla.redhat.com/2536382",
             "https://bugzilla.redhat.com/2538209",
             "https://bugzilla.redhat.com/2538306",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2531725",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2536382",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2538209",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2538306",
             "https://creativecommons.org/licenses/by/4.0/",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-8674",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-86805",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-89092",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-95818",
-            "https://errata.almalinux.org/9/ALSA-2026-95618.html",
-            "https://errata.rockylinux.org/RLSA-2026:95618",
+            "https://errata.almalinux.org/10/ALSA-2026-98599.html",
+            "https://errata.rockylinux.org/RLSA-2026:98512",
             "https://linux.oracle.com/cve/CVE-2026-95818.html",
             "https://linux.oracle.com/errata/ELSA-2026-96087.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-95818",
@@ -3808,6 +3836,53 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
           "LastModifiedDate": "2026-06-17T02:43:19.643Z"
         },
         {
+          "VulnerabilityID": "CVE-2026-100290",
+          "PkgID": "libc6@2.41-12+deb13u4",
+          "PkgName": "libc6",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libc6@2.41-12%2Bdeb13u4?arch=amd64\u0026distro=debian-13.7",
+            "UID": "3ca032b3dd7124c6"
+          },
+          "InstalledVersion": "2.41-12+deb13u4",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:b96fe2995f90d0ef0bf14f9b4a67b5f4e77d478e6108166e0565adc9efd6e4a3",
+            "DiffID": "sha256:8a3b315d45080ecb38e39d42d28e951303c67c2ce7482bcdbbc3b5424be19013"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-100290",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Fingerprint": "sha256:b6722ed6cf1f7bc5f66ea4e67d82001b4aaafe3f9342f282ddd6fe662f17fcd0",
+          "Title": "glibc: glibc: Denial of Service via memory allocation failure during regular expression processing",
+          "Description": "The regcomp and regexec functions in the GNU C Library version 2.3 to version 2.44 may read freed memory and free the same heap block twice when a memory allocation fails while a regular expression is compiled or matched.  The re_dfa_add_node (the NFA node table) and build_range_exp (bracket ranges) grow several arrays with consecutive realloc calls and store the new pointers only after all of them succeed.  When a later call fails, the pattern buffer keeps pointers to blocks that were already freed, and the error cleanup frees them again.  In regexec, the back-reference cache (match_ctx_add_entry) frees its array when a realloc fails but keeps the pointer, which is freed again on the error path.\n\nAn attacker does not need to supply a crafted regular expression: patterns large enough to grow these arrays are common.  The failure has to hit a specific allocation, though, so the issue can only be reached when the system is already under memory pressure.  An attacker who supplies the pattern or the subject string has little control over which allocation fails, so the expected impact is a crash of the process.  This issue affects all architectures and ABIs supported by the GNU C Library.",
+          "Severity": "LOW",
+          "CweIDs": [
+            "CWE-415"
+          ],
+          "VendorSeverity": {
+            "redhat": 1
+          },
+          "CVSS": {
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L",
+              "V3Score": 3.7
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-100290",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-100290",
+            "https://sourceware.org/bugzilla/show_bug.cgi?id=31935",
+            "https://sourceware.org/bugzilla/show_bug.cgi?id=34991",
+            "https://sourceware.org/git/?p=glibc.git;a=blob_plain;f=advisories/GLIBC-SA-2026-0028",
+            "https://www.cve.org/CVERecord?id=CVE-2026-100290"
+          ],
+          "PublishedDate": "2026-11-11T16:17:24.667Z",
+          "LastModifiedDate": "2026-11-17T15:17:27.667Z"
+        },
+        {
           "VulnerabilityID": "CVE-2026-97399",
           "PkgID": "libc6@2.41-12+deb13u4",
           "PkgName": "libc6",
@@ -3858,7 +3933,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
           "LastModifiedDate": "2026-09-29T21:36:39.547Z"
         },
         {
-          "VulnerabilityID": "CVE-2026-100290",
+          "VulnerabilityID": "CVE-2026-121757",
           "PkgID": "libc6@2.41-12+deb13u4",
           "PkgName": "libc6",
           "PkgIdentifier": {
@@ -3871,29 +3946,28 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "Digest": "sha256:b96fe2995f90d0ef0bf14f9b4a67b5f4e77d478e6108166e0565adc9efd6e4a3",
             "DiffID": "sha256:8a3b315d45080ecb38e39d42d28e951303c67c2ce7482bcdbbc3b5424be19013"
           },
-          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-100290",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-121757",
           "DataSource": {
             "ID": "debian",
             "Name": "Debian Security Tracker",
             "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
           },
-          "Fingerprint": "sha256:b6722ed6cf1f7bc5f66ea4e67d82001b4aaafe3f9342f282ddd6fe662f17fcd0",
-          "Title": "The regcomp and regexec functions in the GNU C Library version 2.3 to  ...",
-          "Description": "The regcomp and regexec functions in the GNU C Library version 2.3 to version 2.44 may read freed memory and free the same heap block twice when a memory allocation fails while a regular expression is compiled or matched.  The re_dfa_add_node (the NFA node table) and build_range_exp (bracket ranges) grow several arrays with consecutive realloc calls and store the new pointers only after all of them succeed.  When a later call fails, the pattern buffer keeps pointers to blocks that were already freed, and the error cleanup frees them again.  In regexec, the back-reference cache (match_ctx_add_entry) frees its array when a realloc fails but keeps the pointer, which is freed again on the error path.\n\nAn attacker does not need to supply a crafted regular expression: patterns large enough to grow these arrays are common.  The failure has to hit a specific allocation, though, so the issue can only be reached when the system is already under memory pressure.  An attacker who supplies the pattern or the subject string has little control over which allocation fails, so the expected impact is a crash of the process.  This issue affects all architectures and ABIs supported by the GNU C Library.",
+          "Fingerprint": "sha256:878e94f0e9a288c7c70aca514ebc84ed01e9948f2b0a007c310dbf2a63896133",
+          "Title": "Converting crafted CP949 input to UTF-8 character encoding and ignorin ...",
+          "Description": "Converting crafted CP949 input to UTF-8 character encoding and ignoring invalid characters, in the GNU C Library version 2.1 or later may result in the converter reading past the end of the input buffer, causing the calling application to crash.\n\nWhen the CP949 decoder encounters an invalid input byte sequence like '\\xa2\\xe8' it ends up advancing the pointer tracking the read buffer position twice.  If //IGNORE is set on the destination encoding and this sequence is at the end of the input buffer, the decoder may then end up reading past the bounds of the input buffer.  To exploit this, the target iconv function needs to set //IGNORE on the destination of the conversion and the input and encoding needs to be attacker controlled.",
           "Severity": "UNKNOWN",
           "CweIDs": [
-            "CWE-415"
+            "CWE-126"
           ],
           "References": [
-            "https://sourceware.org/bugzilla/show_bug.cgi?id=31935",
-            "https://sourceware.org/bugzilla/show_bug.cgi?id=34991",
-            "https://sourceware.org/git/?p=glibc.git;a=blob_plain;f=advisories/GLIBC-SA-2026-0028"
+            "https://sourceware.org/bugzilla/show_bug.cgi?id=35016",
+            "https://sourceware.org/git/?p=glibc.git;a=blob_plain;f=advisories/GLIBC-SA-2026-0029"
           ],
-          "PublishedDate": "2026-11-11T16:17:24.667Z",
-          "LastModifiedDate": "2026-11-12T22:09:39.233Z"
+          "PublishedDate": "2026-11-17T23:17:45.723Z",
+          "LastModifiedDate": "2026-11-18T17:17:31.65Z"
         },
         {
-          "VulnerabilityID": "CVE-2026-115819",
+          "VulnerabilityID": "CVE-2026-121758",
           "PkgID": "libc6@2.41-12+deb13u4",
           "PkgName": "libc6",
           "PkgIdentifier": {
@@ -3906,25 +3980,99 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "Digest": "sha256:b96fe2995f90d0ef0bf14f9b4a67b5f4e77d478e6108166e0565adc9efd6e4a3",
             "DiffID": "sha256:8a3b315d45080ecb38e39d42d28e951303c67c2ce7482bcdbbc3b5424be19013"
           },
-          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-115819",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-121758",
           "DataSource": {
             "ID": "debian",
             "Name": "Debian Security Tracker",
             "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
           },
-          "Fingerprint": "sha256:1999d6d455f918b54017965bbe844c56ae9439ba02543fc484ed941351a0353d",
-          "Title": "Calling the wide scanf family of functions (swscanf, fwscanf, wscanf,  ...",
-          "Description": "Calling the wide scanf family of functions (swscanf, fwscanf, wscanf, vswscanf, vfwscanf and vwscanf) with a %s or %[ conversion without the 'l' length modifier in the GNU C Library version 2.2 to version 2.44 writes an extra null byte one past the end of the destination array when the converted multibyte string and its terminating null byte exactly fill that array.\n\nThese conversions store each wide input character into the caller's char array as a multibyte sequence.  The conversion ends with the sequence that returns to the initial shift state, which also stores the terminating null byte, and the functions then append a second null byte.  A destination sized for the converted string and one terminator, as the C standard requires the caller to provide, is therefore written one byte past its end.  The out-of-bounds byte is always a null byte, which may corrupt adjacent data or crash the process.  An attacker who supplies the input can trigger the overflow with a string whose converted length exactly fills the destination.\n\nThe narrow scanf functions, the %ls and %l[ conversions into a wchar_t array, and the 'a' and 'm' allocation modifiers are not affected, and storing a wide scanf conversion into a narrow char array is uncommon.  This issue affects all architectures and ABIs supported by the GNU C Library.",
+          "Fingerprint": "sha256:ac2cd8994a202bf7aca52c8def95f8bf383e2348626e175fcf75b78257d570e1",
+          "Title": "Converting crafted ISO-2022-CN-EXT input to UTF-8 character encoding,  ...",
+          "Description": "Converting crafted ISO-2022-CN-EXT input to UTF-8 character encoding, in the GNU C Library version 2.2 through 2.44 may result in the converter reading past the end of the input buffer, causing the calling application to crash.\n\nWhen the ISO-2022-CN-EXT decoder encounters an invalid input byte sequence like '\\x0e' it ends up advancing the pointer tracking the read buffer position twice.  If this sequence is at the end of the input buffer, the decoder may then end up reading past the bounds of the input buffer.  To exploit this, the input and encoding needs to be attacker controlled.",
           "Severity": "UNKNOWN",
           "CweIDs": [
-            "CWE-193"
+            "CWE-126"
           ],
           "References": [
-            "https://sourceware.org/bugzilla/show_bug.cgi?id=34989",
-            "https://sourceware.org/git/?p=glibc.git;a=blob_plain;f=advisories/GLIBC-SA-2026-0027"
+            "https://sourceware.org/bugzilla/show_bug.cgi?id=34774",
+            "https://sourceware.org/git/?p=glibc.git;a=blob_plain;f=advisories/GLIBC-SA-2026-00230"
           ],
-          "PublishedDate": "2026-11-11T16:17:24.98Z",
-          "LastModifiedDate": "2026-11-12T22:09:39.233Z"
+          "PublishedDate": "2026-11-17T23:17:45.85Z",
+          "LastModifiedDate": "2026-11-18T17:17:31.767Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-124024",
+          "PkgID": "libc6@2.41-12+deb13u4",
+          "PkgName": "libc6",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libc6@2.41-12%2Bdeb13u4?arch=amd64\u0026distro=debian-13.7",
+            "UID": "3ca032b3dd7124c6"
+          },
+          "InstalledVersion": "2.41-12+deb13u4",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:b96fe2995f90d0ef0bf14f9b4a67b5f4e77d478e6108166e0565adc9efd6e4a3",
+            "DiffID": "sha256:8a3b315d45080ecb38e39d42d28e951303c67c2ce7482bcdbbc3b5424be19013"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-124024",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Fingerprint": "sha256:8b70599299bce2773e1010c76bfcac1981439fa3ef89f27b289d2ed993c46e35",
+          "Title": "Converting crafted input from UCS-4 to IBM1390 or IBM1399 character en ...",
+          "Description": "Converting crafted input from UCS-4 to IBM1390 or IBM1399 character encoding, in the GNU C Library version 2.3.3 and later may result in the converter reading past the end of the input buffer, causing the calling application to crash.\n\nWhen converting from UCS-4, these encoders may encounter a combining base such as U+00E6 and jump ahead by 4 bytes to check the next UCS-4 code point.  The check for end of buffer however does not account for this, which may result in a buffer overread if the following code point has less than 4 bytes remaining.  Exploitation of this bug not only requires attacker control of input and encoding, but also strict control over layout of the input in memory.",
+          "Severity": "UNKNOWN",
+          "CweIDs": [
+            "CWE-126"
+          ],
+          "References": [
+            "https://sourceware.org/bugzilla/show_bug.cgi?id=34914",
+            "https://sourceware.org/git/?p=glibc.git;a=blob_plain;f=advisories/GLIBC-SA-2026-00231"
+          ],
+          "PublishedDate": "2026-11-17T23:17:46.107Z",
+          "LastModifiedDate": "2026-11-18T17:17:33.467Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-107493",
+          "PkgID": "libssl3t64@3.5.7-1~deb13u3",
+          "PkgName": "libssl3t64",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libssl3t64@3.5.7-1~deb13u3?arch=amd64\u0026distro=debian-13.7",
+            "UID": "e2b70cc67e03ceb6"
+          },
+          "InstalledVersion": "3.5.7-1~deb13u3",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:810e2b405a0884835290e120ef380aa14dd1f53198a0cfa2260147e736d82cd5",
+            "DiffID": "sha256:2cef49adb7d7902c61ecdd385036e3c7fb7c9f0ada96a41901797c77b7daedd7"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-107493",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Fingerprint": "sha256:3ddcc0c5a6bd8c5b231673808538476e155e22d8b08b6843ac584385989dd586",
+          "Title": "Issue summary: When an application passes a stack to PEM_X509_INFO_rea ...",
+          "Description": "Issue summary: When an application passes a stack to\nPEM_X509_INFO_read_bio_ex() to add entries to, and reading fails,\nOpenSSL frees every entry in the stack, both the old ones and any new\nones, but leaves them in the stack.\n\nImpact summary: An application that passes an existing stack to\nPEM_X509_INFO_read_bio_ex() and keeps using it after a failed read may\nuse memory that was already freed. This can cause a crash or, in\nprinciple, memory corruption. Malformed PEM data can make the read fail,\nbut only applications that pass an existing stack are affected, and\nOpenSSL itself does not do this.\n\nCWE: CWE-416: Use After Free\n\nDescription: PEM_X509_INFO_read_bio_ex() reads certificates, CRLs and\nprivate keys from PEM data and adds them to a stack of X509_INFO\nstructures. If the application passes a stack that is not NULL, the\nfunction adds the new entries to it and must leave the entries that are\nalready there unchanged.\n\nIf reading fails, the function frees every entry in the stack. This\nincludes the entries that were there before the call, and the entries\nadded by the call. It does not remove these entries from the stack, so\nthe stack keeps pointers to freed memory. The failure can happen at any\npoint, even before any entry was added. A PEM item with invalid content\nis enough.  This also happens if the stack was empty: entries added\nbefore the failure are freed but stay in the stack.\n\nAn application that then reads or frees the stack will use memory that\nwas already freed. This can crash the application or, in principle,\ncorrupt memory.\n\nOnly applications that pass a stack that is not NULL are affected.\nOpenSSL itself never does this. Its own callers, including the code that\nTLS uses to load CA certificates, always pass NULL. When the stack is\nNULL, the function frees only the entries that it created itself, which\nis safe. We expect that very few applications pass an existing stack. An\nattacker can make the read fail with malformed PEM data, but cannot make\nan application pass an existing stack.\n\nThe same problem affects PEM_X509_INFO_read_bio(), PEM_X509_INFO_read()\nand PEM_X509_INFO_read_ex(), which use the same code. OpenSSL 1.1.1 and\n1.0.2 have only the first two of these functions.\n\nFIPS impact: no\nThe affected code is outside the FIPS module boundary.",
+          "Severity": "MEDIUM",
+          "CweIDs": [
+            "CWE-416"
+          ],
+          "VendorSeverity": {
+            "ubuntu": 2
+          },
+          "References": [
+            "https://github.com/openssl/openssl/commit/0486dfadfec558e1808f59d35a8d79e541c4e7d7",
+            "https://github.com/openssl/openssl/commit/c57a5ccf0c060755b5494a6870922b7c6cdd7dd8",
+            "https://github.com/openssl/openssl/commit/c8f6d04f8e6d40b1bf83334e4a2ec9daf5943a3d",
+            "https://openssl-library.org/news/secadv/20261117.txt",
+            "https://www.cve.org/CVERecord?id=CVE-2026-107493"
+          ],
+          "PublishedDate": "2026-11-17T09:17:25.87Z",
+          "LastModifiedDate": "2026-11-17T22:17:20.83Z"
         },
         {
           "VulnerabilityID": "CVE-2026-107496",
@@ -3964,7 +4112,87 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://www.cve.org/CVERecord?id=CVE-2026-107496"
           ],
           "PublishedDate": "2026-11-10T19:18:02.583Z",
-          "LastModifiedDate": "2026-11-10T22:10:04.727Z"
+          "LastModifiedDate": "2026-11-16T19:17:24.6Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-124709",
+          "PkgID": "libssl3t64@3.5.7-1~deb13u3",
+          "PkgName": "libssl3t64",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libssl3t64@3.5.7-1~deb13u3?arch=amd64\u0026distro=debian-13.7",
+            "UID": "e2b70cc67e03ceb6"
+          },
+          "InstalledVersion": "3.5.7-1~deb13u3",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:810e2b405a0884835290e120ef380aa14dd1f53198a0cfa2260147e736d82cd5",
+            "DiffID": "sha256:2cef49adb7d7902c61ecdd385036e3c7fb7c9f0ada96a41901797c77b7daedd7"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-124709",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Fingerprint": "sha256:ac90681fff0ac15f876ec8b6991c67173fe749855c043a8ef3f884223d4e8d7f",
+          "Title": "Issue summary: A QUIC server that rejects a stream opened by the peer  ...",
+          "Description": "Issue summary: A QUIC server that rejects a stream opened by the peer may\nretain that stream's state for the lifetime of the connection if the peer\nresets the stream before the rejection is signalled, even though the peer's\nstream credit is returned.\n\nImpact summary: A remote client that completes a QUIC handshake can repeatedly\nopen and reset streams, causing server memory to grow without bound until the\nprocess runs out of memory and every connection on it is lost. This is a\nDenial of Service.\n\nCWE: CWE-401: Missing Release of Memory after Effective Lifetime\n\nDescription: QUIC servers track each stream the peer opens. When the incoming\nstream policy rejects a stream, OpenSSL schedules a STOP_SENDING frame, marks\nthe stream deleted and returns the peer's stream credit. A deleted stream is\ncollected only once its receive part is fully drained, which for a rejected\nstream means the STOP_SENDING has been acknowledged. If the peer sends\nRESET_STREAM first, the reset cancels the pending STOP_SENDING, so it is never\nsent or acknowledged and the stream is never collected.\n\nThe default configuration reaches this path. Once a connection has a default\nstream, meaning the application has read from or written to the connection as\nthe tutorial server does, the effective incoming stream policy rejects streams\nthe application does not accept. Applications that set the REJECT policy\nexplicitly are affected too.\n\nEach retained stream costs about 300 bytes, and the peer's stream credit\nwindow paces how quickly they accumulate. A client that keeps the connection\nopen and keeps opening and resetting streams grows server memory without\nbound. The severity is Low because growth is slow, needs a long-lived\nconnection, and causes no memory corruption or disclosure.\n\nFIPS impact: no\nThe affected code is outside the FIPS module boundary.",
+          "Severity": "MEDIUM",
+          "CweIDs": [
+            "CWE-401"
+          ],
+          "VendorSeverity": {
+            "ubuntu": 2
+          },
+          "References": [
+            "https://github.com/openssl/openssl/commit/22291a6af12f158fbb13bfbd572a33dbdbf290d2",
+            "https://github.com/openssl/openssl/commit/ead311df1037e7994a6d86c7e862d71ad59c52c7",
+            "https://github.com/openssl/openssl/commit/f3acb0a3328046741479482c51cec815839e1b05",
+            "https://openssl-library.org/news/secadv/20261117.txt",
+            "https://www.cve.org/CVERecord?id=CVE-2026-124709"
+          ],
+          "PublishedDate": "2026-11-17T09:17:27.227Z",
+          "LastModifiedDate": "2026-11-17T22:17:22.377Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-35190",
+          "PkgID": "libssl3t64@3.5.7-1~deb13u3",
+          "PkgName": "libssl3t64",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/debian/libssl3t64@3.5.7-1~deb13u3?arch=amd64\u0026distro=debian-13.7",
+            "UID": "e2b70cc67e03ceb6"
+          },
+          "InstalledVersion": "3.5.7-1~deb13u3",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:810e2b405a0884835290e120ef380aa14dd1f53198a0cfa2260147e736d82cd5",
+            "DiffID": "sha256:2cef49adb7d7902c61ecdd385036e3c7fb7c9f0ada96a41901797c77b7daedd7"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-35190",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Fingerprint": "sha256:0a607858f0b52a7f460abaa89909241bf0e26f020a4743d885e4c04229ded849",
+          "Title": "Issue summary: A server configured with the Suite B certificate flag t ...",
+          "Description": "Issue summary: A server configured with the Suite B certificate flag through\nSSL_CTX_set_cert_flags() and with TLS 1.3 enabled may read past the end of a\nfixed group list when it processes a ClientHello whose supported_groups and\nkey_share contain no Suite B group.\n\nImpact summary: A remote client can send a ClientHello that makes the server\nread past the end of a static array. The values read are never returned to the\nclient, so no memory is disclosed; on builds with sanitizers or hardened\nallocators the read may crash the process, causing Denial of Service.\n\nCWE: CWE-125: Out-of-bounds Read\n\nDescription: When the Suite B certificate flag is set, OpenSSL restricts the\naccepted groups to P-256 and P-384 by substituting a fixed two-element list\nfor the configured group list. The tuple machinery used for key-share\nselection was not updated for this substitution: tls1_get_group_tuples() still\nreturns the configured tuples, which by default describe eight groups. The\nserver-side walk in tls_parse_ctos_key_share() then advances through the\ntwo-element list using those tuple counts without checking the cumulative\noffset against the number of groups present.\n\nOnly applications that call SSL_CTX_set_cert_flags() with\nSSL_CERT_FLAG_SUITEB_128_LOS and leave TLS 1.3 enabled are affected. The\nopenssl s_server -suiteB_128 option sets an X.509 verification parameter\ninstead, so the stock command line server is not vulnerable. Default\nconfigurations do not reach this code.\n\nA client that offers only groups outside the Suite B set, such as X25519,\nforces every tuple to be walked and the read to run past the array. The bytes\nread are compared against client group IDs and never sent back, so no memory\nis disclosed. On builds with address sanitizers or hardened allocators the\nread can abort the process; in ordinary release builds it reads a few bytes of\nadjacent constant data.\n\nFIPS impact: no\nThe affected code is outside the FIPS module boundary.",
+          "Severity": "MEDIUM",
+          "CweIDs": [
+            "CWE-125"
+          ],
+          "VendorSeverity": {
+            "ubuntu": 2
+          },
+          "References": [
+            "https://github.com/openssl/openssl/commit/9491b0d9cc7950af1f3dc89499bd5433b9cd4f43",
+            "https://github.com/openssl/openssl/commit/9a812981b927c5714b7c2e5d138618105cea2152",
+            "https://github.com/openssl/openssl/commit/ade64619df04056b3e5fd1c1befe9425a7c80eb6",
+            "https://openssl-library.org/news/secadv/20261117.txt",
+            "https://www.cve.org/CVERecord?id=CVE-2026-35190"
+          ],
+          "PublishedDate": "2026-11-17T09:17:27.56Z",
+          "LastModifiedDate": "2026-11-17T22:17:21.473Z"
         },
         {
           "VulnerabilityID": "CVE-2026-88822",
@@ -4004,7 +4232,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://www.cve.org/CVERecord?id=CVE-2026-88822"
           ],
           "PublishedDate": "2026-11-10T19:21:34.623Z",
-          "LastModifiedDate": "2026-11-10T22:10:04.727Z"
+          "LastModifiedDate": "2026-11-16T20:19:17.693Z"
         },
         {
           "VulnerabilityID": "CVE-2026-88823",
@@ -4044,7 +4272,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://www.cve.org/CVERecord?id=CVE-2026-88823"
           ],
           "PublishedDate": "2026-11-10T19:21:34.847Z",
-          "LastModifiedDate": "2026-11-10T22:10:04.727Z"
+          "LastModifiedDate": "2026-11-16T20:19:17.89Z"
         },
         {
           "VulnerabilityID": "CVE-2026-95691",
@@ -4084,7 +4312,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://www.cve.org/CVERecord?id=CVE-2026-95691"
           ],
           "PublishedDate": "2026-11-10T19:21:39.377Z",
-          "LastModifiedDate": "2026-11-10T22:10:04.727Z"
+          "LastModifiedDate": "2026-11-16T20:19:19.43Z"
         },
         {
           "VulnerabilityID": "CVE-2026-95692",
@@ -4124,71 +4352,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://www.cve.org/CVERecord?id=CVE-2026-95692"
           ],
           "PublishedDate": "2026-11-10T19:21:39.53Z",
-          "LastModifiedDate": "2026-11-10T22:10:04.727Z"
-        },
-        {
-          "VulnerabilityID": "CVE-2026-76844",
-          "VendorIDs": [
-            "DSA-6613-1"
-          ],
-          "PkgID": "zlib1g@1:1.3.dfsg+really1.3.1-1+b1",
-          "PkgName": "zlib1g",
-          "PkgIdentifier": {
-            "PURL": "pkg:deb/debian/zlib1g@1.3.dfsg%2Breally1.3.1-1%2Bb1?arch=amd64\u0026distro=debian-13.7\u0026epoch=1",
-            "UID": "ee958543a42dbedd"
-          },
-          "InstalledVersion": "1:1.3.dfsg+really1.3.1-1+b1",
-          "FixedVersion": "1:1.3.dfsg+really1.3.1-1+deb13u1",
-          "Status": "fixed",
-          "Layer": {
-            "Digest": "sha256:cac2ae0193cb073e7492050b05fc342a888651b4bbc966908c8793f889c299ba",
-            "DiffID": "sha256:e4ba966d7f0527dfe0fcb559e4e18d4da42c4e6beae924719255e0dedb554ed0"
-          },
-          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-76844",
-          "DataSource": {
-            "ID": "debian",
-            "Name": "Debian Security Tracker",
-            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
-          },
-          "Fingerprint": "sha256:6765b031e73a16cd840205bec62b31be824c51c36ecd0b4871cc20e90c570bcc",
-          "Title": "webpack-dev-middleware: webpack-dev-middleware before 7.4.6 and 8.3.0 Path Traversal via Non-Slash-Terminated publicPath",
-          "Description": "webpack-dev-middleware 5.3.4, 6.1.2 through 6.1.3, 7.1.0 before 7.4.6, and 8.0.0 before 8.3.0 contains a path traversal vulnerability in getFilenameFromUrl that bypasses the fix for CVE-2024-29180: a publicPath without a trailing slash is matched by string prefix, and the '..' guard runs before that prefix is stripped. Unauthenticated attackers can request a path such as /assets../secret to read files one directory above the output directory when the middleware serves from the physical filesystem through writeToDisk or a custom outputFileSystem.",
-          "Severity": "HIGH",
-          "CweIDs": [
-            "CWE-22"
-          ],
-          "VendorSeverity": {
-            "azure": 2,
-            "ghsa": 3,
-            "redhat": 3
-          },
-          "CVSS": {
-            "ghsa": {
-              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:N/A:N",
-              "V3Score": 7.4
-            },
-            "redhat": {
-              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:N/A:N",
-              "V3Score": 7.4
-            }
-          },
-          "References": [
-            "https://access.redhat.com/security/cve/CVE-2026-76844",
-            "https://github.com/advisories/GHSA-wr3j-pwj9-hqq6",
-            "https://github.com/webpack/webpack-dev-middleware",
-            "https://github.com/webpack/webpack-dev-middleware/blob/v8.1.1/src/middleware.js",
-            "https://github.com/webpack/webpack-dev-middleware/commit/13344e78b26d88fe9b7c8381a3860e248a52359b",
-            "https://github.com/webpack/webpack-dev-middleware/commit/cefccbac330c29052fc6dffe85fd292ea2ac782b",
-            "https://github.com/webpack/webpack-dev-middleware/pull/2404",
-            "https://github.com/webpack/webpack-dev-middleware/releases/tag/v7.4.6",
-            "https://github.com/webpack/webpack-dev-middleware/releases/tag/v8.3.0",
-            "https://github.com/webpack/webpack-dev-middleware/security/advisories/GHSA-g84c-rxfj-3j2c",
-            "https://nvd.nist.gov/vuln/detail/CVE-2026-76844",
-            "https://www.cve.org/CVERecord?id=CVE-2026-76844",
-            "https://www.vulncheck.com/advisories/webpack-dev-middleware-path-traversal-via-offset-slice-on-a-non-slash-terminated-publicpath"
-          ],
-          "PublishedDate": "2026-08-24T14:17:02.25Z",
-          "LastModifiedDate": "2026-11-13T15:17:56.013Z"
+          "LastModifiedDate": "2026-11-16T19:17:54.88Z"
         },
         {
           "VulnerabilityID": "CVE-2026-85091",
@@ -5050,6 +5214,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
           },
           "References": [
             "https://access.redhat.com/security/cve/CVE-2026-78661",
+            "https://advisory.echohq.com/cve/CVE-2026-78661",
             "https://go.dev/cl/849365",
             "https://go.dev/issue/82224",
             "https://groups.google.com/g/golang-announce/c/sqrs2vTx_Xs",
@@ -5104,6 +5269,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
           },
           "References": [
             "https://access.redhat.com/security/cve/CVE-2026-97045",
+            "https://advisory.echohq.com/cve/CVE-2026-97045",
             "https://go.dev/cl/855121",
             "https://go.dev/issue/82622",
             "https://groups.google.com/g/golang-announce/c/sqrs2vTx_Xs",
@@ -5148,11 +5314,16 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
           "VendorSeverity": {
             "alma": 3,
             "amazon": 3,
+            "bitnami": 2,
             "oracle-oval": 3,
             "redhat": 3,
             "rocky": 3
           },
           "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:N",
+              "V3Score": 6.8
+            },
             "redhat": {
               "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:N",
               "V3Score": 6.8
@@ -5160,24 +5331,28 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
           },
           "References": [
             "http://www.openwall.com/lists/oss-security/2026/10/20/29",
-            "https://access.redhat.com/errata/RHSA-2026:95518",
+            "https://access.redhat.com/errata/RHSA-2026:98539",
+            "https://access.redhat.com/errata/RHSA-2026:98610",
             "https://access.redhat.com/security/cve/CVE-2026-111943",
+            "https://bugzilla.redhat.com/2515815",
+            "https://bugzilla.redhat.com/2515827",
+            "https://bugzilla.redhat.com/2515839",
+            "https://bugzilla.redhat.com/2548334",
             "https://bugzilla.redhat.com/2548336",
+            "https://bugzilla.redhat.com/2548341",
             "https://bugzilla.redhat.com/2556068",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2548336",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2556068",
             "https://creativecommons.org/licenses/by/4.0/",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-111943",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
-            "https://errata.almalinux.org/9/ALSA-2026-95518.html",
-            "https://errata.rockylinux.org/RLSA-2026:95518",
+            "https://errata.almalinux.org/10/ALSA-2026-98610.html",
+            "https://errata.rockylinux.org/RLSA-2026:98539",
             "https://github.com/golang/go/issues/82345",
             "https://go.dev/cl/851047",
             "https://go.dev/issue/82345",
             "https://groups.google.com/g/golang-announce/c/66pojueaQek",
             "https://groups.google.com/g/golang-nuts/c/K22sG2AYnKU",
             "https://linux.oracle.com/cve/CVE-2026-111943.html",
-            "https://linux.oracle.com/errata/ELSA-2026-95638.html",
+            "https://linux.oracle.com/errata/ELSA-2026-97877.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-111943",
             "https://pkg.go.dev/vuln/GO-2026-6809",
             "https://www.cve.org/CVERecord?id=CVE-2026-111943"
@@ -5237,28 +5412,31 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:70641",
+            "https://access.redhat.com/errata/RHSA-2026:98502",
+            "https://access.redhat.com/errata/RHSA-2026:98617",
             "https://access.redhat.com/security/cve/CVE-2026-33818",
+            "https://bugzilla.redhat.com/2484207",
             "https://bugzilla.redhat.com/2515815",
             "https://bugzilla.redhat.com/2515820",
-            "https://bugzilla.redhat.com/2515827",
-            "https://bugzilla.redhat.com/2515838",
             "https://bugzilla.redhat.com/2515839",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2402034",
+            "https://bugzilla.redhat.com/2548344",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515815",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2515820",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515827",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2515838",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515839",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548334",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548336",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548341",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2556068",
             "https://creativecommons.org/licenses/by/4.0/",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-11395",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-111943",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-33818",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56853",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56858",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56860",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56862",
-            "https://errata.almalinux.org/9/ALSA-2026-70641.html",
-            "https://errata.rockylinux.org/RLSA-2026:70641",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-78667",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-94440",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
+            "https://errata.almalinux.org/10/ALSA-2026-98617.html",
+            "https://errata.rockylinux.org/RLSA-2026:98502",
             "https://github.com/golang/go/issues/80405",
             "https://go.dev/cl/814980",
             "https://go.dev/issue/80405",
@@ -5471,17 +5649,12 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://access.redhat.com/errata/RHSA-2026:67319",
             "https://access.redhat.com/errata/RHSA-2026:67517",
             "https://access.redhat.com/errata/RHSA-2026:68504",
+            "https://access.redhat.com/errata/RHSA-2026:97386",
             "https://access.redhat.com/security/cve/CVE-2026-39821",
-            "https://bugzilla.redhat.com/2467809",
-            "https://bugzilla.redhat.com/2467820",
+            "https://bugzilla.redhat.com/2445345",
+            "https://bugzilla.redhat.com/2445356",
+            "https://bugzilla.redhat.com/2467822",
             "https://bugzilla.redhat.com/2480756",
-            "https://bugzilla.redhat.com/2484204",
-            "https://bugzilla.redhat.com/2515815",
-            "https://bugzilla.redhat.com/2515820",
-            "https://bugzilla.redhat.com/2515827",
-            "https://bugzilla.redhat.com/2515838",
-            "https://bugzilla.redhat.com/2515839",
-            "https://bugzilla.redhat.com/2515840",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456333",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456339",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2467809",
@@ -5509,7 +5682,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56859",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56860",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56862",
-            "https://errata.almalinux.org/9/ALSA-2026-65153.html",
+            "https://errata.almalinux.org/10/ALSA-2026-97386.html",
             "https://errata.rockylinux.org/RLSA-2026:65886",
             "https://go.dev/cl/767220",
             "https://go.dev/issue/78760",
@@ -5640,28 +5813,33 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:70641",
+            "https://access.redhat.com/errata/RHSA-2026:98502",
+            "https://access.redhat.com/errata/RHSA-2026:98610",
             "https://access.redhat.com/security/cve/CVE-2026-56853",
             "https://bugzilla.redhat.com/2515815",
-            "https://bugzilla.redhat.com/2515820",
             "https://bugzilla.redhat.com/2515827",
-            "https://bugzilla.redhat.com/2515838",
             "https://bugzilla.redhat.com/2515839",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2402034",
+            "https://bugzilla.redhat.com/2548334",
+            "https://bugzilla.redhat.com/2548336",
+            "https://bugzilla.redhat.com/2548341",
+            "https://bugzilla.redhat.com/2556068",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515815",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2515820",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515827",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2515838",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515839",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548334",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548336",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548341",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2556068",
             "https://creativecommons.org/licenses/by/4.0/",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-11395",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-111943",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-33818",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56853",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56858",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56860",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56862",
-            "https://errata.almalinux.org/9/ALSA-2026-70641.html",
-            "https://errata.rockylinux.org/RLSA-2026:70641",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-78667",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-94440",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
+            "https://errata.almalinux.org/10/ALSA-2026-98610.html",
+            "https://errata.rockylinux.org/RLSA-2026:98502",
             "https://go.dev/cl/795540",
             "https://go.dev/issue/80205",
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
@@ -5725,28 +5903,33 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:70641",
+            "https://access.redhat.com/errata/RHSA-2026:98479",
+            "https://access.redhat.com/errata/RHSA-2026:98555",
             "https://access.redhat.com/security/cve/CVE-2026-56858",
             "https://bugzilla.redhat.com/2515815",
             "https://bugzilla.redhat.com/2515820",
             "https://bugzilla.redhat.com/2515827",
             "https://bugzilla.redhat.com/2515838",
             "https://bugzilla.redhat.com/2515839",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2402034",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515815",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515820",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515827",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515838",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515839",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548336",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548344",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2556068",
             "https://creativecommons.org/licenses/by/4.0/",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-11395",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-111943",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-33818",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56853",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56858",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56860",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56862",
-            "https://errata.almalinux.org/9/ALSA-2026-70641.html",
-            "https://errata.rockylinux.org/RLSA-2026:70641",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-78669",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
+            "https://errata.almalinux.org/10/ALSA-2026-98555.html",
+            "https://errata.rockylinux.org/RLSA-2026:98479",
             "https://go.dev/cl/807100",
             "https://go.dev/issue/80435",
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
@@ -5811,37 +5994,31 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:69961",
+            "https://access.redhat.com/errata/RHSA-2026:98447",
+            "https://access.redhat.com/errata/RHSA-2026:98554",
             "https://access.redhat.com/security/cve/CVE-2026-56859",
-            "https://bugzilla.redhat.com/2480684",
-            "https://bugzilla.redhat.com/2508234",
             "https://bugzilla.redhat.com/2515815",
             "https://bugzilla.redhat.com/2515820",
             "https://bugzilla.redhat.com/2515827",
             "https://bugzilla.redhat.com/2515838",
             "https://bugzilla.redhat.com/2515839",
             "https://bugzilla.redhat.com/2515840",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2480684",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2508234",
+            "https://bugzilla.redhat.com/2518147",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2467809",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515815",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515820",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2515827",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515838",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515839",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515840",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2518147",
             "https://creativecommons.org/licenses/by/4.0/",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-17106",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-19730",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-33818",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-39830",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56853",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-42499",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56858",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56859",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56860",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56862",
-            "https://errata.almalinux.org/9/ALSA-2026-69961.html",
-            "https://errata.rockylinux.org/RLSA-2026:69961",
+            "https://errata.almalinux.org/10/ALSA-2026-98554.html",
+            "https://errata.rockylinux.org/RLSA-2026:98447",
             "https://github.com/golang/go/issues/80481",
             "https://go.dev/cl/803320",
             "https://go.dev/issue/80481",
@@ -5907,28 +6084,33 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:70641",
+            "https://access.redhat.com/errata/RHSA-2026:98479",
+            "https://access.redhat.com/errata/RHSA-2026:98617",
             "https://access.redhat.com/security/cve/CVE-2026-56860",
+            "https://bugzilla.redhat.com/2484207",
             "https://bugzilla.redhat.com/2515815",
             "https://bugzilla.redhat.com/2515820",
-            "https://bugzilla.redhat.com/2515827",
-            "https://bugzilla.redhat.com/2515838",
             "https://bugzilla.redhat.com/2515839",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2402034",
+            "https://bugzilla.redhat.com/2548344",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515815",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515820",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515827",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515838",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515839",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548336",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548344",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2556068",
             "https://creativecommons.org/licenses/by/4.0/",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-11395",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-111943",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-33818",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56853",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56858",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56860",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56862",
-            "https://errata.almalinux.org/9/ALSA-2026-70641.html",
-            "https://errata.rockylinux.org/RLSA-2026:70641",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-78669",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
+            "https://errata.almalinux.org/10/ALSA-2026-98617.html",
+            "https://errata.rockylinux.org/RLSA-2026:98479",
             "https://go.dev/cl/803681",
             "https://go.dev/issue/80494",
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
@@ -5993,34 +6175,37 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:70641",
+            "https://access.redhat.com/errata/RHSA-2026:98502",
+            "https://access.redhat.com/errata/RHSA-2026:98617",
             "https://access.redhat.com/security/cve/CVE-2026-56862",
+            "https://bugzilla.redhat.com/2484207",
             "https://bugzilla.redhat.com/2515815",
             "https://bugzilla.redhat.com/2515820",
-            "https://bugzilla.redhat.com/2515827",
-            "https://bugzilla.redhat.com/2515838",
             "https://bugzilla.redhat.com/2515839",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2402034",
+            "https://bugzilla.redhat.com/2548344",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515815",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2515820",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515827",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2515838",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2515839",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548334",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548336",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548341",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2556068",
             "https://creativecommons.org/licenses/by/4.0/",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-11395",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-111943",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-33818",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56853",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56858",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56860",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56862",
-            "https://errata.almalinux.org/9/ALSA-2026-70641.html",
-            "https://errata.rockylinux.org/RLSA-2026:70641",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-78667",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-94440",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
+            "https://errata.almalinux.org/10/ALSA-2026-98617.html",
+            "https://errata.rockylinux.org/RLSA-2026:98502",
             "https://github.com/golang/go/issues/80528",
             "https://go.dev/cl/804261",
             "https://go.dev/issue/80528",
             "https://groups.google.com/g/golang-announce/c/94pEornpRlI",
             "https://linux.oracle.com/cve/CVE-2026-56862.html",
-            "https://linux.oracle.com/errata/ELSA-2026-70641.html",
+            "https://linux.oracle.com/errata/ELSA-2026-97877.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-56862",
             "https://pkg.go.dev/vuln/GO-2026-6090",
             "https://ubuntu.com/security/notices/USN-8935-1",
@@ -6080,26 +6265,33 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:93617",
+            "https://access.redhat.com/errata/RHSA-2026:98502",
+            "https://access.redhat.com/errata/RHSA-2026:98610",
             "https://access.redhat.com/security/cve/CVE-2026-78667",
+            "https://bugzilla.redhat.com/2515815",
+            "https://bugzilla.redhat.com/2515827",
+            "https://bugzilla.redhat.com/2515839",
             "https://bugzilla.redhat.com/2548334",
             "https://bugzilla.redhat.com/2548336",
             "https://bugzilla.redhat.com/2548341",
-            "https://bugzilla.redhat.com/2548344",
             "https://bugzilla.redhat.com/2556068",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2515815",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2515827",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2515839",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2548334",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2548336",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2548341",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2548344",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2556068",
             "https://creativecommons.org/licenses/by/4.0/",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-111943",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-33818",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56853",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56862",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-78667",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-78669",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-94440",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
-            "https://errata.almalinux.org/9/ALSA-2026-93617.html",
-            "https://errata.rockylinux.org/RLSA-2026:93617",
+            "https://errata.almalinux.org/10/ALSA-2026-98610.html",
+            "https://errata.rockylinux.org/RLSA-2026:98502",
             "https://github.com/golang/go/issues/81858",
             "https://go.dev/cl/847309",
             "https://go.dev/issue/81858",
@@ -6167,26 +6359,33 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:93617",
+            "https://access.redhat.com/errata/RHSA-2026:98479",
+            "https://access.redhat.com/errata/RHSA-2026:98617",
             "https://access.redhat.com/security/cve/CVE-2026-78669",
-            "https://bugzilla.redhat.com/2548334",
-            "https://bugzilla.redhat.com/2548336",
-            "https://bugzilla.redhat.com/2548341",
+            "https://bugzilla.redhat.com/2484207",
+            "https://bugzilla.redhat.com/2515815",
+            "https://bugzilla.redhat.com/2515820",
+            "https://bugzilla.redhat.com/2515839",
             "https://bugzilla.redhat.com/2548344",
-            "https://bugzilla.redhat.com/2556068",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2548334",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2515815",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2515820",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2515827",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2515838",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2515839",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2548336",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2548341",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2548344",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2556068",
             "https://creativecommons.org/licenses/by/4.0/",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-111943",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-78667",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-33818",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56853",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56858",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56860",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56862",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-78669",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-94440",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
-            "https://errata.almalinux.org/9/ALSA-2026-93617.html",
-            "https://errata.rockylinux.org/RLSA-2026:93617",
+            "https://errata.almalinux.org/10/ALSA-2026-98617.html",
+            "https://errata.rockylinux.org/RLSA-2026:98479",
             "https://github.com/golang/go/issues/81742",
             "https://go.dev/cl/847186",
             "https://go.dev/cl/847308",
@@ -6254,22 +6453,38 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:95518",
+            "https://access.redhat.com/errata/RHSA-2026:98502",
+            "https://access.redhat.com/errata/RHSA-2026:98610",
             "https://access.redhat.com/security/cve/CVE-2026-97031",
+            "https://bugzilla.redhat.com/2515815",
+            "https://bugzilla.redhat.com/2515827",
+            "https://bugzilla.redhat.com/2515839",
+            "https://bugzilla.redhat.com/2548334",
             "https://bugzilla.redhat.com/2548336",
+            "https://bugzilla.redhat.com/2548341",
             "https://bugzilla.redhat.com/2556068",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2515815",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2515827",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2515839",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548334",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2548336",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2548341",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2556068",
             "https://creativecommons.org/licenses/by/4.0/",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-111943",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-33818",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56853",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56862",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-78667",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-94440",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
-            "https://errata.almalinux.org/9/ALSA-2026-95518.html",
-            "https://errata.rockylinux.org/RLSA-2026:95518",
+            "https://errata.almalinux.org/10/ALSA-2026-98610.html",
+            "https://errata.rockylinux.org/RLSA-2026:98502",
             "https://go.dev/cl/847312",
             "https://go.dev/issue/81855",
             "https://groups.google.com/g/golang-announce/c/U2fTuyDJznI",
             "https://linux.oracle.com/cve/CVE-2026-97031.html",
-            "https://linux.oracle.com/errata/ELSA-2026-95519.html",
+            "https://linux.oracle.com/errata/ELSA-2026-97877.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-97031",
             "https://pkg.go.dev/vuln/GO-2026-6607",
             "https://www.cve.org/CVERecord?id=CVE-2026-97031"
@@ -6327,6 +6542,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:86093",
             "https://access.redhat.com/errata/RHSA-2026:86196",
             "https://access.redhat.com/security/cve/CVE-2026-56866",
             "https://bugzilla.redhat.com/2548334",
@@ -6364,7 +6580,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97030",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97032",
-            "https://errata.almalinux.org/9/ALSA-2026-86196.html",
+            "https://errata.almalinux.org/10/ALSA-2026-86093.html",
             "https://errata.rockylinux.org/RLSA-2026:86196",
             "https://github.com/golang/go/issues/81740",
             "https://go.dev/cl/847306",
@@ -6430,6 +6646,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:86093",
             "https://access.redhat.com/errata/RHSA-2026:86196",
             "https://access.redhat.com/security/cve/CVE-2026-78659",
             "https://bugzilla.redhat.com/2548334",
@@ -6467,7 +6684,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97030",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97032",
-            "https://errata.almalinux.org/9/ALSA-2026-86196.html",
+            "https://errata.almalinux.org/10/ALSA-2026-86093.html",
             "https://errata.rockylinux.org/RLSA-2026:86196",
             "https://github.com/golang/go/issues/81857",
             "https://go.dev/cl/847185",
@@ -6535,6 +6752,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:86093",
             "https://access.redhat.com/errata/RHSA-2026:86196",
             "https://access.redhat.com/security/cve/CVE-2026-78660",
             "https://bugzilla.redhat.com/2548334",
@@ -6572,7 +6790,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97030",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97032",
-            "https://errata.almalinux.org/9/ALSA-2026-86196.html",
+            "https://errata.almalinux.org/10/ALSA-2026-86093.html",
             "https://errata.rockylinux.org/RLSA-2026:86196",
             "https://github.com/golang/go/issues/81115",
             "https://go.dev/cl/835145",
@@ -6621,7 +6839,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "bitnami": 4,
             "redhat": 2,
@@ -6639,6 +6857,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:86093",
             "https://access.redhat.com/errata/RHSA-2026:86196",
             "https://access.redhat.com/security/cve/CVE-2026-78663",
             "https://bugzilla.redhat.com/2548334",
@@ -6676,7 +6895,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97030",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97032",
-            "https://errata.almalinux.org/9/ALSA-2026-86196.html",
+            "https://errata.almalinux.org/10/ALSA-2026-86093.html",
             "https://errata.rockylinux.org/RLSA-2026:86196",
             "https://github.com/golang/go/issues/81743",
             "https://go.dev/cl/847187",
@@ -6743,6 +6962,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:86093",
             "https://access.redhat.com/errata/RHSA-2026:86196",
             "https://access.redhat.com/security/cve/CVE-2026-94439",
             "https://bugzilla.redhat.com/2548334",
@@ -6780,7 +7000,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97030",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97032",
-            "https://errata.almalinux.org/9/ALSA-2026-86196.html",
+            "https://errata.almalinux.org/10/ALSA-2026-86093.html",
             "https://errata.rockylinux.org/RLSA-2026:86196",
             "https://github.com/golang/go/issues/81744",
             "https://go.dev/cl/847311",
@@ -6846,26 +7066,33 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:93617",
+            "https://access.redhat.com/errata/RHSA-2026:98502",
+            "https://access.redhat.com/errata/RHSA-2026:98610",
             "https://access.redhat.com/security/cve/CVE-2026-94440",
+            "https://bugzilla.redhat.com/2515815",
+            "https://bugzilla.redhat.com/2515827",
+            "https://bugzilla.redhat.com/2515839",
             "https://bugzilla.redhat.com/2548334",
             "https://bugzilla.redhat.com/2548336",
             "https://bugzilla.redhat.com/2548341",
-            "https://bugzilla.redhat.com/2548344",
             "https://bugzilla.redhat.com/2556068",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2515815",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2515827",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2515839",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2548334",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2548336",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2548341",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2548344",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2556068",
             "https://creativecommons.org/licenses/by/4.0/",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-111943",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-33818",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56853",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-56862",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-78667",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-78669",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-94440",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
-            "https://errata.almalinux.org/9/ALSA-2026-93617.html",
-            "https://errata.rockylinux.org/RLSA-2026:93617",
+            "https://errata.almalinux.org/10/ALSA-2026-98610.html",
+            "https://errata.rockylinux.org/RLSA-2026:98502",
             "https://github.com/golang/go/issues/81741",
             "https://go.dev/cl/847307",
             "https://go.dev/issue/81741",
@@ -6930,6 +7157,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:86093",
             "https://access.redhat.com/errata/RHSA-2026:86196",
             "https://access.redhat.com/security/cve/CVE-2026-94448",
             "https://bugzilla.redhat.com/2548334",
@@ -6967,7 +7195,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97030",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97032",
-            "https://errata.almalinux.org/9/ALSA-2026-86196.html",
+            "https://errata.almalinux.org/10/ALSA-2026-86093.html",
             "https://errata.rockylinux.org/RLSA-2026:86196",
             "https://go.dev/cl/839866",
             "https://go.dev/issue/81821",
@@ -7028,6 +7256,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:86093",
             "https://access.redhat.com/errata/RHSA-2026:86196",
             "https://access.redhat.com/security/cve/CVE-2026-97030",
             "https://bugzilla.redhat.com/2548334",
@@ -7065,7 +7294,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97030",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97032",
-            "https://errata.almalinux.org/9/ALSA-2026-86196.html",
+            "https://errata.almalinux.org/10/ALSA-2026-86093.html",
             "https://errata.rockylinux.org/RLSA-2026:86196",
             "https://go.dev/cl/840925",
             "https://go.dev/issue/81823",
@@ -7128,6 +7357,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:86093",
             "https://access.redhat.com/errata/RHSA-2026:86196",
             "https://access.redhat.com/security/cve/CVE-2026-97032",
             "https://bugzilla.redhat.com/2548334",
@@ -7165,7 +7395,7 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97030",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97031",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-97032",
-            "https://errata.almalinux.org/9/ALSA-2026-86196.html",
+            "https://errata.almalinux.org/10/ALSA-2026-86093.html",
             "https://errata.rockylinux.org/RLSA-2026:86196",
             "https://github.com/golang/go/issues/81867",
             "https://go.dev/cl/847188",
@@ -7180,6 +7410,50 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
           ],
           "PublishedDate": "2026-10-08T23:17:06.213Z",
           "LastModifiedDate": "2026-10-15T16:18:24.967Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-97054",
+          "VendorIDs": [
+            "GO-2026-6859"
+          ],
+          "PkgID": "stdlib@v1.26.5",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.26.5",
+            "UID": "6fa919811dab4c12"
+          },
+          "InstalledVersion": "v1.26.5",
+          "FixedVersion": "1.26.11, 1.27.4",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:909209fd3f577021e848e61d68d80c51eeec74cd6cd97fb9941548fd83f46b40",
+            "DiffID": "sha256:f21ddd9b07c94af72f8fcb261e7d7e110545c7dde4b32a93b2a2e5f8e941d17a"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-97054",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:8dc147efb48f9c8ff8ed5d54c6881d30eed52c828c50abae6f765b219322f053",
+          "Title": "For HTTP/1 servers, when MaxBytesReader's limit is exceeded, \"Connecti ...",
+          "Description": "For HTTP/1 servers, when MaxBytesReader's limit is exceeded, \"Connection: close\" header is automatically set without synchronization, which might race with another header being set explicitly in the server handler. As a result, an HTTP/1 server that utilizes MaxBytesReader or MaxBytesHandler can crash due to runtime panic if its handler reads the request body concurrently with writing the response header.",
+          "Severity": "MEDIUM",
+          "CweIDs": [
+            "CWE-362",
+            "CWE-820"
+          ],
+          "VendorSeverity": {
+            "amazon": 2
+          },
+          "References": [
+            "https://go.dev/cl/862185",
+            "https://go.dev/issue/82563",
+            "https://groups.google.com/g/golang-announce/c/iY8TY0wWgbM",
+            "https://pkg.go.dev/vuln/GO-2026-6859"
+          ],
+          "PublishedDate": "2026-11-11T05:19:58.943Z",
+          "LastModifiedDate": "2026-11-16T16:17:56.29Z"
         },
         {
           "VulnerabilityID": "CVE-2026-56857",
@@ -7214,7 +7488,8 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
           ],
           "VendorSeverity": {
             "bitnami": 4,
-            "redhat": 1
+            "redhat": 1,
+            "ubuntu": 2
           },
           "CVSS": {
             "bitnami": {
@@ -7228,52 +7503,17 @@ Valid keys: `+JSON.stringify(Object.keys(_),null,"  "));var re=J(H,Q,V,Y,X+"."+Q
           },
           "References": [
             "https://access.redhat.com/security/cve/CVE-2026-56857",
+            "https://github.com/golang/go/issues/81739",
             "https://go.dev/cl/847305",
             "https://go.dev/issue/81739",
             "https://groups.google.com/g/golang-announce/c/U2fTuyDJznI",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-56857",
             "https://pkg.go.dev/vuln/GO-2026-6604",
-            "https://www.cve.org/CVERecord?id=CVE-2026-56857"
+            "https://www.cve.org/CVERecord?id=CVE-2026-56857",
+            "https://www.openwall.com/lists/oss-security/2026/10/08/9"
           ],
           "PublishedDate": "2026-10-08T23:17:01.487Z",
           "LastModifiedDate": "2026-10-09T16:35:35.9Z"
-        },
-        {
-          "VulnerabilityID": "CVE-2026-97054",
-          "VendorIDs": [
-            "GO-2026-6859"
-          ],
-          "PkgID": "stdlib@v1.26.5",
-          "PkgName": "stdlib",
-          "PkgIdentifier": {
-            "PURL": "pkg:golang/stdlib@v1.26.5",
-            "UID": "6fa919811dab4c12"
-          },
-          "InstalledVersion": "v1.26.5",
-          "FixedVersion": "1.26.11, 1.27.4",
-          "Status": "fixed",
-          "Layer": {
-            "Digest": "sha256:909209fd3f577021e848e61d68d80c51eeec74cd6cd97fb9941548fd83f46b40",
-            "DiffID": "sha256:f21ddd9b07c94af72f8fcb261e7d7e110545c7dde4b32a93b2a2e5f8e941d17a"
-          },
-          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-97054",
-          "DataSource": {
-            "ID": "govulndb",
-            "Name": "The Go Vulnerability Database",
-            "URL": "https://pkg.go.dev/vuln/"
-          },
-          "Fingerprint": "sha256:8dc147efb48f9c8ff8ed5d54c6881d30eed52c828c50abae6f765b219322f053",
-          "Title": "For HTTP/1 servers, when MaxBytesReader's limit is exceeded, \"Connecti ...",
-          "Description": "For HTTP/1 servers, when MaxBytesReader's limit is exceeded, \"Connection: close\" header is automatically set without synchronization, which might race with another header being set explicitly in the server handler. As a result, an HTTP/1 server that utilizes MaxBytesReader or MaxBytesHandler can crash due to runtime panic if its handler reads the request body concurrently with writing the response header.",
-          "Severity": "UNKNOWN",
-          "References": [
-            "https://go.dev/cl/862185",
-            "https://go.dev/issue/82563",
-            "https://groups.google.com/g/golang-announce/c/iY8TY0wWgbM",
-            "https://pkg.go.dev/vuln/GO-2026-6859"
-          ],
-          "PublishedDate": "2026-11-11T05:19:58.943Z",
-          "LastModifiedDate": "2026-11-12T22:09:39.233Z"
         }
       ]
     }

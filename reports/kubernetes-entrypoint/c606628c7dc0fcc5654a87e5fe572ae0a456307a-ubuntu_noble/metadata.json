@@ -1,0 +1,9 @@
+{
+  "image": "kubernetes-entrypoint",
+  "tag": "c606628c7dc0fcc5654a87e5fe572ae0a456307a-ubuntu_noble",
+  "digest": "sha256:8bb1ee400c0cb6f7ca09a1db6561caab1b287554783123d756af24c15d380411",
+  "image_reference": "ghcr.io/cloudification-io/kubernetes-entrypoint@sha256:8bb1ee400c0cb6f7ca09a1db6561caab1b287554783123d756af24c15d380411",
+  "generated_at": "2026-11-18T23:49:52.622100+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}

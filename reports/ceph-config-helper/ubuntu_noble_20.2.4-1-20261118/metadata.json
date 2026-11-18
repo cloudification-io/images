@@ -1,0 +1,9 @@
+{
+  "image": "ceph-config-helper",
+  "tag": "ubuntu_noble_20.2.4-1-20261118",
+  "digest": "sha256:dba3aa1f297461dbe6e5ad42cb55cadc1419021dc21acccdf9cac91d4bdd6da9",
+  "image_reference": "ghcr.io/cloudification-io/ceph-config-helper@sha256:dba3aa1f297461dbe6e5ad42cb55cadc1419021dc21acccdf9cac91d4bdd6da9",
+  "generated_at": "2026-11-18T23:50:01.399307+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}
