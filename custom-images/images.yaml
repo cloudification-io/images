@@ -188,6 +188,15 @@ images:
     paths:
       - openvswitch/
 
+  - name: watcher
+    dockerfile: watcher/Dockerfile
+    context: watcher
+    tag_template: "{release}-ubuntu_noble"
+    releases: ["2026.1"]
+    base_image: "quay.io/airshipit/watcher:{release}-ubuntu_noble"
+    paths:
+      - watcher/
+
   # Gnocchi sources from quay.io/openstack.kolla (airshipit image doesn't exist) — uses dash, not underscore
   - name: gnocchi-api
     dockerfile: gnocchi-api/Dockerfile
