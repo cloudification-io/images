@@ -16,6 +16,7 @@ ARG CLOUDKITTY_DASHBOARD_REF=stable/${OPENSTACK_RELEASE}-c12n
 ARG OCTAVIA_DASHBOARD_REF=stable/${OPENSTACK_RELEASE}
 ARG NEUTRON_FWAAS_DASHBOARD_REF=stable/${OPENSTACK_RELEASE}
 ARG BARBICAN_UI_REF=main
+ARG WATCHER_DASHBOARD_REF=stable/${OPENSTACK_RELEASE}
 ARG CACHE_BUST=local
 
 # version the fork as the horizon=== pin so the constraints stay intact;
@@ -35,6 +36,7 @@ RUN uv pip install -c /upper-constraints.txt \
         "octavia-dashboard @ git+https://opendev.org/openstack/octavia-dashboard.git@${OCTAVIA_DASHBOARD_REF}" \
         "neutron-fwaas-dashboard @ git+https://opendev.org/openstack/neutron-fwaas-dashboard.git@${NEUTRON_FWAAS_DASHBOARD_REF}" \
         "cloudkitty-dashboard @ git+https://github.com/cloudification-io/cloudkitty-dashboard.git@${CLOUDKITTY_DASHBOARD_REF}" \
+        "watcher-dashboard @ git+https://opendev.org/openstack/watcher-dashboard.git@${WATCHER_DASHBOARD_REF}" \
         "barbican-ui @ git+https://github.com/cloudification-io/barbican-ui.git@${BARBICAN_UI_REF}" \
  && uv pip install oslo.policy==4.3.0
 
