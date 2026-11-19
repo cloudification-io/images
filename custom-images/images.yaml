@@ -196,6 +196,7 @@ images:
     base_image: "quay.io/airshipit/watcher:{release}-ubuntu_noble"
     paths:
       - watcher/
+      - overrides/
 
   # Gnocchi sources from quay.io/openstack.kolla (airshipit image doesn't exist) — uses dash, not underscore
   - name: gnocchi-api
