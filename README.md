@@ -71,6 +71,50 @@ A pull request that changes the workflow or the list builds the images as a test
 
 [mirror-upstream.yml](.github/workflows/mirror-upstream.yml) copies the images in [mirror-images.yaml](mirror-images.yaml) from their upstream registries to `ghcr.io/cloudification-io` with `mirror-to-ghcr.sh`, on a push that changes the file and weekly (Monday 02:00 UTC). `mirror-matrix.sh` expands the file into rows for the script and for CI. After the copy, every listed tag is scanned with Trivy and the reports are published to the same GitHub Pages site as the custom image reports. Kolla entries list their `releases` and use `{release}` in the tag. An entry with `suffix_tag: true` also gets a dated copy, `<tag>-YYYYmmdd`, each time its upstream digest changes; use it for upstream tags that move, such as `latest`. A tag is copied only when its upstream digest differs from the unsuffixed copy on GHCR, so unchanged images get no new dated tag; the `force` dispatch input (or `FORCE=true`) copies everything.
 
+### Renovate
+
+[renovate.yml](.github/workflows/renovate.yml) runs Renovate ([renovate.json5](renovate.json5)) on the 1st of each month. When upstream has a newer build of a mirrored image, it opens one pull request for all of them. `gh workflow run Renovate` starts it by hand; add `-f dry_run=true` to only log what it would do.
+
+Renovate tracks the first entry under `tags:` of every image without `suffix_tag`:
+
+| Tag | Example | What is proposed |
+|---|---|---|
+| Dated | `ubuntu_noble-20260515` | A newer date; everything before the date stays equal |
+| Ceph | `ubuntu_jammy_20.2.1-1-20260515` | A newer Ceph version, package revision or date for the same distro |
+| Commit hash | `15b84102…-ubuntu_noble` | The newest commit on upstream `master` (`quay.io/airshipit` images) |
+
+A bump adds the new tag as the first entry and keeps the old one below it:
+
+```yaml
+    tags:
+      - alias: ubuntu_noble
+        tag: ubuntu_noble-20261118
+      - tag: ubuntu_noble-20260515
+```
+
+- Write `alias` above `tag` in the first entry, so that the alias stays with the newest tag.
+- Renovate reads an image only in this layout: `source` unquoted and above `tags:`, `tags:` as the last key of the image, the first tag unquoted with nothing after it on the line, and no comment line inside the first two entries.
+- Old tags are never removed. Delete an entry when no environment runs the tag; its Trivy reports go with it.
+- A move to another distro or series (`ubuntu_jammy` to `ubuntu_noble`) is manual: put the new tag first.
+- The image for a new upstream commit is built some time after the commit. If the mirror run reports the tag as missing upstream, run it again later; if upstream never builds it, delete the entry.
+
+A pull request that changes `mirror-images.yaml` or the Renovate files runs the same checks as the commands below. It fails when the first tag of an image is not read by Renovate or its lookup fails. Renovate's own pull requests do not run them: a pull request opened with the workflow token starts no workflows.
+
+Run the commands in a normal clone: in a `git worktree` the container cannot follow the `.git` file and the commit-hash lookup fails.
+
+```bash
+# schema check
+podman run --rm -v "$PWD":/repo -w /repo -e RENOVATE_CONFIG_FILE=/repo/renovate.json5 \
+    renovate/renovate:44 renovate-config-validator
+
+# extraction dry-run against the working tree, then the check of what was read
+podman run --rm -v "$PWD":/tmp/repo -w /tmp/repo -e RENOVATE_PLATFORM=local -e LOG_LEVEL=debug \
+    -e RENOVATE_REPORT_TYPE=file -e RENOVATE_REPORT_PATH=/tmp/repo/renovate-report.json \
+    renovate/renovate:44 renovate
+.github/scripts/check-renovate-pins.sh expected |
+    .github/scripts/check-renovate-pins.sh check renovate-report.json
+```
+
 ## Mirroring images to Docker Hub
 
 Mirror images from `ghcr.io/cloudification-io` to `docker.io/cloudification` using [skopeo](https://github.com/containers/skopeo). The script mirrors the images listed in `IMAGES`, or discovers all packages via the GitHub API when `IMAGES` is unset.

@@ -1,0 +1,59 @@
+{
+  "enabledManagers": ["custom.regex"],
+  "dependencyDashboard": {"enabled": true},
+  "semanticCommits": "enabled",
+
+  "packageRules": [
+    // One PR for all bumps.
+    {
+      "matchFileNames": ["mirror-images.yaml"],
+      "groupName": "mirrored images",
+      "separateMajorMinor": false
+    },
+    // Ceph tags: ubuntu_jammy_20.2.1-1-20260515
+    // Only the distro must stay equal: the Ceph version orders, then the
+    // package revision and the date.
+    {
+      "matchCurrentValue": "/^ubuntu_[a-z]+_\\d+\\.\\d+\\.\\d+-\\d+-\\d{8}$/",
+      "versioning": "regex:^(?<compatibility>ubuntu_[a-z]+)_(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<build>\\d+)-(?<revision>\\d{8})$"
+    }
+  ],
+
+  // Both managers read mirror-images.yaml in three steps: the image block from
+  // its `source:` line, the first entry under `tags:`, the tag itself. Only the
+  // first entry is tracked. The replace template adds the new tag above it and
+  // keeps the old one as the next entry.
+  "customManagers": [
+    // Dated tags: ubuntu_noble-20260515, ubuntu_jammy_20.2.1-1-20260515
+    // Everything before the datestamp is `compatibility` and must stay equal.
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^mirror-images\\.yaml$/"],
+      "matchStringsStrategy": "recursive",
+      "matchStrings": [
+        "source:[^\\S\\n]*(?<depName>[^\\s\"']+)[^\\S\\n]*\\n(?:[^\\S\\n]{4,}[^\\n]*(?:\\n|$))+",
+        "tags:[^\\S\\n]*\\n(?<indentation>[^\\S\\n]+)- (?:alias:[^\\n]*\\n[^\\S\\n]+)?tag:[^\\S\\n]*[\\w.-]+-\\d{8}(?:\\d{6})?[^\\S\\n]*(?:\\n[^\\S\\n]+- |\\n[^\\S\\n]*$|$)",
+        "tag:[^\\S\\n]*(?<currentValue>[\\w.-]+-\\d{8}(?:\\d{6})?)"
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "regex:^(?<compatibility>.+)-(?<minor>\\d{8})(?<patch>\\d{6})?$",
+      "autoReplaceStringTemplate": "tag: {{{newValue}}}\n{{{indentation}}}- tag: {{{currentValue}}}"
+    },
+    // Commit-hash tags: 15b84102d9f2d106657412054aac29b5c6fbdba4-ubuntu_noble
+    // The hash follows upstream master; the suffix after it is kept.
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^mirror-images\\.yaml$/"],
+      "matchStringsStrategy": "recursive",
+      "matchStrings": [
+        "source:[^\\S\\n]*(?<depName>quay\\.io/airshipit/(?<repo>[^\\s/]+))[^\\S\\n]*\\n(?:[^\\S\\n]{4,}[^\\n]*(?:\\n|$))+",
+        "tags:[^\\S\\n]*\\n(?<indentation>[^\\S\\n]+)- (?:alias:[^\\n]*\\n[^\\S\\n]+)?tag:[^\\S\\n]*[0-9a-f]{40}-[\\w.]+[^\\S\\n]*(?:\\n[^\\S\\n]+- |\\n[^\\S\\n]*$|$)",
+        "tag:[^\\S\\n]*(?<currentDigest>[0-9a-f]{40})-(?<depType>[\\w.]+)"
+      ],
+      "datasourceTemplate": "git-refs",
+      "packageNameTemplate": "https://opendev.org/airship/{{{repo}}}",
+      "currentValueTemplate": "master",
+      "autoReplaceStringTemplate": "tag: {{{newDigest}}}-{{{depType}}}\n{{{indentation}}}- tag: {{{currentDigest}}}-{{{depType}}}"
+    }
+  ]
+}
