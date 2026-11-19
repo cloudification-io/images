@@ -1,0 +1,9 @@
+{
+  "image": "gnocchi-metricd",
+  "tag": "2026.1-ubuntu-noble-20261119125110",
+  "digest": "sha256:3723994bdd908e383ab48e42359ba48c1e61b88d89a28b10fd4a7f1da85696e4",
+  "image_reference": "ghcr.io/cloudification-io/gnocchi-metricd@sha256:3723994bdd908e383ab48e42359ba48c1e61b88d89a28b10fd4a7f1da85696e4",
+  "generated_at": "2026-11-19T12:52:36.986502+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}

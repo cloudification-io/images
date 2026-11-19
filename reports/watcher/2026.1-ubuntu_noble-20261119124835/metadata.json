@@ -1,0 +1,9 @@
+{
+  "image": "watcher",
+  "tag": "2026.1-ubuntu_noble-20261119124835",
+  "digest": "sha256:22c21e0ceedac9951ad73158bc81b80f6b072ddcbbe3dae5362f1cf91676ad87",
+  "image_reference": "ghcr.io/cloudification-io/watcher@sha256:22c21e0ceedac9951ad73158bc81b80f6b072ddcbbe3dae5362f1cf91676ad87",
+  "generated_at": "2026-11-19T12:49:25.294394+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}

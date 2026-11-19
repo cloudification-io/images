@@ -1,0 +1,9 @@
+{
+  "image": "cinder",
+  "tag": "2025.1-ubuntu_noble-20261119124833",
+  "digest": "sha256:e877037c16bda697a10917630b928f23b1ef2b59e700068dffc3db46041859d9",
+  "image_reference": "ghcr.io/cloudification-io/cinder@sha256:e877037c16bda697a10917630b928f23b1ef2b59e700068dffc3db46041859d9",
+  "generated_at": "2026-11-19T12:50:50.434533+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}
