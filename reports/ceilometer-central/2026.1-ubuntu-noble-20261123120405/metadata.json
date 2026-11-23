@@ -1,0 +1,9 @@
+{
+  "image": "ceilometer-central",
+  "tag": "2026.1-ubuntu-noble-20261123120405",
+  "digest": "sha256:70046f65928bf98ac26ad29094ed923f2837af048fd101e7337a9ad61bedcf1d",
+  "image_reference": "ghcr.io/cloudification-io/ceilometer-central@sha256:70046f65928bf98ac26ad29094ed923f2837af048fd101e7337a9ad61bedcf1d",
+  "generated_at": "2026-11-23T12:04:58.964840+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}

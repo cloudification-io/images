@@ -1,0 +1,9 @@
+{
+  "image": "designate-backend-bind9",
+  "tag": "2026.1-ubuntu-noble-20261123120237",
+  "digest": "sha256:3b5e596b85d8974050ca0602cf1007889b9e5264dff55dc6c16742c00c2016e6",
+  "image_reference": "ghcr.io/cloudification-io/designate-backend-bind9@sha256:3b5e596b85d8974050ca0602cf1007889b9e5264dff55dc6c16742c00c2016e6",
+  "generated_at": "2026-11-23T12:03:53.994869+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}
