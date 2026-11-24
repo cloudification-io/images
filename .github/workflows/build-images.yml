@@ -78,10 +78,10 @@ jobs:
           # Use GitHub-provided SHAs for reliable diff (handles merge commits)
           # Fall back to HEAD~1 only if before_sha is zeroed (first push to branch)
           if [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
-            CHANGED=$(git diff --name-only HEAD~1 HEAD -- custom-images/)
-          else
-            CHANGED=$(git diff --name-only "$BEFORE_SHA" "$AFTER_SHA" -- custom-images/)
+            BEFORE_SHA=$(git rev-parse HEAD~1)
           fi
+          CHANGED=$(git diff --name-only "$BEFORE_SHA" "$AFTER_SHA" -- custom-images/)
+          echo "before_sha=$BEFORE_SHA" >> "$GITHUB_OUTPUT"
 
           # Strip "custom-images/" prefix and store as JSON array for jq consumption
           CHANGED_JSON=$(echo "$CHANGED" | sed 's|^custom-images/||' | jq -R -s -c '[split("\n") | .[] | select(length > 0)]')
@@ -95,6 +95,7 @@ jobs:
           IMAGES: ${{ inputs.images }}
           EVENT: ${{ github.event_name }}
           CHANGED_FILES: ${{ steps.changes.outputs.files }}
+          BEFORE_SHA: ${{ steps.changes.outputs.before_sha }}
         run: |
           # One row per (image, release); dispatch filters are applied by the script
           ROWS=$(custom-images/matrix.sh)
@@ -104,23 +105,29 @@ jobs:
             .build_contexts |= (map(if test("://") then . else sub("="; "=custom-images/") end) | join("\n")) |
             .build_args |= join("\n")]')
 
-          # Filter by changed paths on push events
+          # On push, keep only the rows that the push touches
           if [ "$EVENT" = "push" ]; then
-            CHANGED="$CHANGED_FILES"
+            # Rows that an images.yaml change adds or changes
+            CHANGED_ROW_IDS='[]'
+            if echo "$CHANGED_FILES" | jq -e 'any(. == "images.yaml")' > /dev/null 2>&1; then
+              if CHANGED_ROW_IDS=$(custom-images/changed-rows.sh "$BEFORE_SHA" "$GITHUB_SHA"); then
+                echo "images.yaml changed, new or changed rows: $(echo "$CHANGED_ROW_IDS" | jq -r 'join(", ")')"
+              else
+                echo "images.yaml changed and the previous matrix could not be computed: rebuilding all images"
+                CHANGED_ROW_IDS=$(echo "$ROWS" | jq -c '[.[].row_id]')
+              fi
+            fi
 
-            # If images.yaml itself changed, rebuild everything
-            if echo "$CHANGED" | jq -e 'any(. == "images.yaml")' > /dev/null 2>&1; then
-              echo "images.yaml changed — rebuilding all images"
-            else
-              # Keep only rows where at least one changed file starts with one of the image's paths
-              ROWS=$(echo "$ROWS" | jq -c --argjson changed "$CHANGED" '
-                [.[] | select(
+            # Keep those rows and the rows where a changed file starts with one of the image's paths
+            ROWS=$(echo "$ROWS" | jq -c --argjson files "$CHANGED_FILES" --argjson ids "$CHANGED_ROW_IDS" '
+              [.[] | select(
+                (.row_id as $r | $ids | index($r) != null) or (
                   .paths as $paths |
-                  any($changed[]; . as $file |
+                  any($files[]; . as $file |
                     any($paths[]; . as $p | ($file | startswith($p)))
                   )
-                )]')
-            fi
+                )
+              )]')
           fi
 
           # On schedule, keep only rows whose base image digest differs from the
@@ -162,6 +169,10 @@ jobs:
           IMAGE_COUNT=$(echo "$MATRIX" | jq '.include | length')
           echo "Rows to build: $IMAGE_COUNT"
           echo "$MATRIX" | jq -r '.include[].row_id'
+          {
+            echo "### Rows to build"
+            echo "$MATRIX" | jq -r '.include | if length == 0 then "none" else .[] | "- \(.row_id)" end'
+          } >> "$GITHUB_STEP_SUMMARY"
 
           if [ "$IMAGE_COUNT" -gt 0 ]; then
             echo "has_images=true" >> "$GITHUB_OUTPUT"
