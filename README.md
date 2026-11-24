@@ -32,7 +32,7 @@ export USE_TIMESTAMP="false"
 
 ## Building specific images or releases only
 
-`IMAGES` takes a comma-separated list of image names, `OPENSTACK_RELEASE` a single release; both are filters, empty means all. A release filter never matches images without releases (openvswitch, sbom-discovery, ceph); build those by name.
+`IMAGES` takes a comma-separated list of image names, `OPENSTACK_RELEASE` a single release; both are filters, empty means all. A release filter never matches images without releases (openvswitch, sbom-discovery, snmptrapd, ceph); build those by name.
 
 ```bash
 export IMAGES="nova,neutron"

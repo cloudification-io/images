@@ -307,6 +307,14 @@ images:
     paths:
       - sbom-discovery/
 
+  - name: snmptrapd
+    dockerfile: snmptrapd/Dockerfile
+    context: snmptrapd
+    tag_template: "1.0"
+    base_image: "docker.io/library/alpine:3.24"
+    paths:
+      - snmptrapd/
+
   - name: ceph
     dockerfile: ceph/Dockerfile
     context: ceph
