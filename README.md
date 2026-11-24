@@ -45,7 +45,8 @@ bash custom-images/build-local.sh
 
 [build-images.yml](.github/workflows/build-images.yml) builds and pushes to `ghcr.io/cloudification-io`:
 
-- on push to `main`, the images whose files changed (every release of them; an `images.yaml` change rebuilds everything)
+- on push to `main`, the images whose files changed (every release of them)
+- on a push that changes `images.yaml`, also the rows that are new or changed in the matrix ([changed-rows.sh](custom-images/changed-rows.sh)); all rows when the matrix before the push cannot be computed
 - weekly (Monday 03:00 UTC), the rows whose `base_image` digest differs from the one recorded on the last build (label `org.opencontainers.image.base.digest`); the job summary lists the decision per row
 - on `workflow_dispatch`, with the same `images` and `openstack_release` filters as the local script; leave both empty to force a full rebuild
 
