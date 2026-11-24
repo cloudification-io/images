@@ -1,0 +1,9 @@
+{
+  "image": "snmptrapd",
+  "tag": "1.0-20261124123812",
+  "digest": "sha256:79e8574b27a2d1c81f01376fdaaaeb2862bc8870f152aae353034eb9f459fc5b",
+  "image_reference": "ghcr.io/cloudification-io/snmptrapd@sha256:79e8574b27a2d1c81f01376fdaaaeb2862bc8870f152aae353034eb9f459fc5b",
+  "generated_at": "2026-11-24T12:38:54.808588+00:00",
+  "report": "index.html",
+  "critical_vulnerabilities": 0
+}
