@@ -1,0 +1,110 @@
+name: Renovate
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Log would-be actions instead of executing them
+        type: boolean
+        default: false
+  schedule:
+    # monthly; two slots because scheduled runs are sometimes dropped
+    - cron: "7 5,17 1 * *"
+  pull_request:
+    paths:
+      - renovate.json5
+      - mirror-images.yaml
+      - .github/workflows/renovate.yml
+      - .github/scripts/check-renovate-pins.sh
+
+concurrency:
+  group: renovate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # yq is on the runner, not in the Renovate container
+  pins:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      expected: ${{ steps.expected.outputs.pins }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: First tag of every tracked image
+        id: expected
+        run: |
+          {
+            echo "pins<<END_OF_PINS"
+            .github/scripts/check-renovate-pins.sh expected
+            echo "END_OF_PINS"
+          } >> "$GITHUB_OUTPUT"
+
+  # Validates the config of the PR branch: schema check, then a full extraction
+  # dry-run against the checkout (platform=local). The renovate job below cannot
+  # do this - renovatebot/github-action reads renovate.json5 from the default branch.
+  validate:
+    if: github.event_name == 'pull_request'
+    needs: pins
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    # root user: the image defaults to a non-root user that cannot write
+    # the runner's file-command state (EACCES in checkout's post step)
+    container:
+      image: renovate/renovate:44
+      options: --user root
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Validate config schema
+        run: renovate-config-validator renovate.json5
+
+      # A config error raised during lookup does not change the exit status,
+      # so fail on the error marker in the log as well.
+      - name: Extraction dry-run against this checkout
+        shell: bash
+        env:
+          RENOVATE_PLATFORM: local
+          RENOVATE_REPORT_TYPE: file
+          RENOVATE_REPORT_PATH: /tmp/renovate-report.json
+          LOG_LEVEL: debug
+        run: |
+          renovate 2>&1 | tee /tmp/renovate-local.log
+          ! grep -qE 'Aggregate error is thrown|"result": "config-validation"' /tmp/renovate-local.log
+
+      # a regex manager skips what it cannot read without any message
+      - name: Every tracked image is read
+        env:
+          EXPECTED_PINS: ${{ needs.pins.outputs.expected }}
+        run: printf '%s\n' "$EXPECTED_PINS" | .github/scripts/check-renovate-pins.sh check /tmp/renovate-report.json
+
+  renovate:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Run Renovate
+        uses: renovatebot/github-action@v46.2.3
+        with:
+          token: ${{ github.token }}
+        env:
+          LOG_LEVEL: debug
+          # Renovate parses the string "null" as unset (live run)
+          RENOVATE_DRY_RUN: ${{ inputs.dry_run && 'full' || 'null' }}
+          RENOVATE_PLATFORM: github
+          RENOVATE_REPOSITORIES: ${{ github.repository }}

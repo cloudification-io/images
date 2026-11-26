@@ -4,6 +4,9 @@
 # Optional "alias" also pushes the same image as ghcr:name:alias (e.g. a clean "latest" tag).
 # Optional "releases" (quoted strings) expands {release} in the tags, one copy per release.
 # A tag is copied only when its upstream digest differs from ghcr:name:tag (FORCE=true overrides).
+#
+# Renovate bumps the first tag entry of an image by adding the newer tag above it;
+# older entries stay until removed by hand. Write "alias" above "tag" in an entry.
 images:
   # OSH images
   - name: ceph-config-helper
@@ -17,11 +20,11 @@ images:
   - name: ovn
     source: quay.io/airshipit/ovn
     tags:
-      - tag: ubuntu_noble-20261118
-        alias: ubuntu_noble
+      - alias: ubuntu_noble
+        tag: ubuntu_noble-20261118
       - tag: ubuntu_noble-20260515
-      - tag: ubuntu_jammy-20260324
-        alias: ubuntu_jammy
+      - alias: ubuntu_jammy
+        tag: ubuntu_jammy-20260324
 
   - name: kubernetes-entrypoint
     source: quay.io/airshipit/kubernetes-entrypoint
